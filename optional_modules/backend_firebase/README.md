@@ -1,6 +1,6 @@
 # Backend Variant: Firebase (Firestore)
 
-Demonstrates swapping the REST (Dio) datasource with Google Cloud Firestore while keeping `IItemRepository`, `ExampleCubit`, and the UI 100% unchanged.
+Demonstrates swapping the REST (Dio) datasource with Google Cloud Firestore while keeping `ItemRepository`, `ExampleCubit`, and the UI 100% unchanged.
 
 ## 1. Dependencies to Add to `pubspec.yaml`
 
@@ -59,11 +59,11 @@ ErrorMapper.register(mapFirebaseException);
 
 ## 3. Architecture Swap Point
 
-In this architecture, Cubits and Blocs depend strictly on `IItemRepository` (which returns `Result<T>`).
-The repository delegates to `IItemRemoteDataSource`.
+In this architecture, Cubits and Blocs depend strictly on `ItemRepository` (which returns `Result<T>`).
+The repository delegates to `ItemRemoteDataSource`.
 
 To switch to Firebase:
 1. Replace `ItemRemoteDataSourceImpl` with `FirebaseItemRemoteDataSourceImpl`.
-2. Register it with `@LazySingleton(as: IItemRemoteDataSource)`.
+2. Register it with `@LazySingleton(as: ItemRemoteDataSource)`.
 3. Register the custom Firebase error mapper via `ErrorMapper.register(mapFirebaseException)`.
 4. Zero lines of UI or Cubit code need to change.

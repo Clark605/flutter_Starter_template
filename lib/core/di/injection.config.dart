@@ -19,8 +19,7 @@ import '../../features/example/bloc/example_detail_bloc.dart' as _i719;
 import '../../features/example/cubit/example_cubit.dart' as _i256;
 import '../../features/example/data/datasources/item_remote_data_source.dart'
     as _i205;
-import '../../features/example/data/repositories/i_item_repository.dart'
-    as _i224;
+import '../../features/example/data/repositories/item_repository.dart' as _i368;
 import '../../features/example/data/repositories/item_repository_impl.dart'
     as _i187;
 import '../cubit/app_settings_cubit.dart' as _i30;
@@ -81,17 +80,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(
       () => dioModule.dio(gh<_i908.AuthInterceptor>()),
     );
-    gh.lazySingleton<_i205.IItemRemoteDataSource>(
+    gh.lazySingleton<_i205.ItemRemoteDataSource>(
       () => _i205.ItemRemoteDataSourceImpl(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i224.IItemRepository>(
-      () => _i187.ItemRepositoryImpl(gh<_i205.IItemRemoteDataSource>()),
+    gh.lazySingleton<_i368.ItemRepository>(
+      () => _i187.ItemRepositoryImpl(gh<_i205.ItemRemoteDataSource>()),
     );
     gh.factory<_i719.ExampleDetailBloc>(
-      () => _i719.ExampleDetailBloc(gh<_i224.IItemRepository>()),
+      () => _i719.ExampleDetailBloc(gh<_i368.ItemRepository>()),
     );
     gh.factory<_i256.ExampleCubit>(
-      () => _i256.ExampleCubit(gh<_i224.IItemRepository>()),
+      () => _i256.ExampleCubit(gh<_i368.ItemRepository>()),
     );
     return this;
   }

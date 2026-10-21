@@ -12,7 +12,7 @@ import 'package:flutter_starter/core/widgets/app_text_field.dart';
 import 'package:flutter_starter/core/widgets/infinite_scroll_list.dart';
 import 'package:flutter_starter/features/example/cubit/example_cubit.dart';
 import 'package:flutter_starter/features/example/cubit/example_state.dart';
-import 'package:flutter_starter/features/example/data/models/item_dto.dart';
+import 'package:flutter_starter/features/example/data/models/item_model.dart';
 import 'package:flutter_starter/features/example/ui/example_detail_args.dart';
 import 'package:flutter_starter/features/example/ui/widgets/item_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -115,7 +115,7 @@ class ExampleScreen extends StatelessWidget {
                 itemCount: 6,
                 separatorBuilder: (_, _) => AppSpacing.gapHMd,
                 itemBuilder: (_, index) => ItemCard(
-                  item: ItemDto(
+                  item: ItemModel(
                     id: index + 1,
                     title: 'Loading item title placeholder',
                     body:
@@ -127,7 +127,7 @@ class ExampleScreen extends StatelessWidget {
             error: (failure) =>
                 AppErrorState(failure: failure, onRetry: cubit.loadItems),
             loaded: (items, hasMore, isLoadingMore, page) {
-              return InfiniteScrollList<ItemDto>(
+              return InfiniteScrollList<ItemModel>(
                 items: items,
                 hasMore: hasMore,
                 isLoadingMore: isLoadingMore,

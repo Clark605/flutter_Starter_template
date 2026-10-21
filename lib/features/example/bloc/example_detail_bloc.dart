@@ -4,14 +4,14 @@ import 'package:flutter_starter/core/errors/failure.dart';
 import 'package:flutter_starter/core/utils/action_token.dart';
 import 'package:flutter_starter/features/example/bloc/example_detail_event.dart';
 import 'package:flutter_starter/features/example/bloc/example_detail_state.dart';
-import 'package:flutter_starter/features/example/data/models/item_dto.dart';
-import 'package:flutter_starter/features/example/data/repositories/i_item_repository.dart';
+import 'package:flutter_starter/features/example/data/models/item_model.dart';
+import 'package:flutter_starter/features/example/data/repositories/item_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
     with ActionGuard<ExampleDetailState> {
-  final IItemRepository _repository;
+  final ItemRepository _repository;
 
   ExampleDetailBloc(this._repository)
     : super(const ExampleDetailState.initial()) {
@@ -30,7 +30,7 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
   }) async {
     emit(const ExampleDetailState.loading());
 
-    final result = await guard<ItemDto>(
+    final result = await guard<ItemModel>(
       () async {
         final repoResult = await _repository.getItem(id);
         return repoResult.fold((item) => item, (failure) => throw failure);
@@ -53,7 +53,7 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
     Emitter<ExampleDetailState> emit, {
     ActionToken? token,
   }) async {
-    final result = await guard<ItemDto>(
+    final result = await guard<ItemModel>(
       () async {
         final repoResult = await _repository.getItem(id);
         return repoResult.fold((item) => item, (failure) => throw failure);

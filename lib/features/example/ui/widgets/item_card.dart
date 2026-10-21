@@ -3,10 +3,10 @@ import 'package:flutter_starter/core/theme/app_radius.dart';
 import 'package:flutter_starter/core/theme/app_spacing.dart';
 import 'package:flutter_starter/core/widgets/app_avatar.dart';
 import 'package:flutter_starter/core/widgets/status_badge.dart';
-import 'package:flutter_starter/features/example/data/models/item_dto.dart';
+import 'package:flutter_starter/features/example/data/models/item_model.dart';
 
 class ItemCard extends StatelessWidget {
-  final ItemDto item;
+  final ItemModel item;
   final VoidCallback? onTap;
 
   const ItemCard({super.key, required this.item, this.onTap});

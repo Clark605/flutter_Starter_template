@@ -1,6 +1,6 @@
 # Backend Variant: Supabase
 
-Demonstrates swapping the REST (Dio) datasource with Supabase (PostgREST + Realtime) while keeping `IItemRepository`, `ExampleCubit`, and the UI 100% unchanged.
+Demonstrates swapping the REST (Dio) datasource with Supabase (PostgREST + Realtime) while keeping `ItemRepository`, `ExampleCubit`, and the UI 100% unchanged.
 
 ## 1. Dependencies to Add to `pubspec.yaml`
 
@@ -46,7 +46,7 @@ ErrorMapper.register(mapSupabaseException);
 
 ## 3. Architecture Swap Point
 
-1. Provide `SupabaseItemRemoteDataSourceImpl` implementing `IItemRemoteDataSource`.
-2. Register it with `@LazySingleton(as: IItemRemoteDataSource)`.
+1. Provide `SupabaseItemRemoteDataSourceImpl` implementing `ItemRemoteDataSource`.
+2. Register it with `@LazySingleton(as: ItemRemoteDataSource)`.
 3. Register the Supabase error mapper with `ErrorMapper.register(...)`.
 4. Run `dart run build_runner build --delete-conflicting-outputs`.

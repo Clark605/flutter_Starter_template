@@ -2,7 +2,7 @@
   "FLAVOR": "staging",
   "APP_NAME": "Starter (Staging)",
   "APPLICATION_ID": "com.starter.flutter_starter.staging",
-  "BASE_URL": "https://jsonplaceholder.typicode.com",
+  "BASE_URL": "https://dummyjson.com",
   "CONNECT_TIMEOUT_SECONDS": 30,
   "RECEIVE_TIMEOUT_SECONDS": 30,
   "ENABLE_LOGGING": true,

@@ -8,9 +8,9 @@ Every feature lives in `lib/features/<feature_name>/`:
 ```
 lib/features/<feature_name>/
 ├── data/
-│   ├── models/          # Freezed + json_serializable DTOs (*.freezed.dart, *.g.dart)
+│   ├── models/          # Freezed + json_serializable models (*.freezed.dart, *.g.dart)
 │   ├── datasources/     # <feature>_remote_data_source.dart (abstract + impl)
-│   └── repositories/    # i_<feature>_repository.dart (interface) + <feature>_repository_impl.dart
+│   └── repositories/    # <feature>_repository.dart (interface) + <feature>_repository_impl.dart
 ├── cubit/               # or bloc/: <feature>_cubit.dart + <feature>_state.dart (Freezed)
 └── ui/
     ├── <feature>_screen.dart
@@ -18,10 +18,10 @@ lib/features/<feature_name>/
 ```
 
 ### The 8 Rules:
-1. **No domain layer:** Cubits/Blocs depend on the repository interface (`data/repositories/i_*`), never on the implementation or a data source.
+1. **No domain layer:** Cubits/Blocs depend on the repository interface (`data/repositories/<feature>_repository.dart`), never on the implementation or a data source.
 2. **Result types & backend-agnostic:** Repositories return `Result<T>`. Data sources throw; the repository converts errors to `Failure`. UI never sees transport packages (Dio, Firebase, Supabase, GraphQL). `ErrorMapper` uses pluggable mappers registered via `ErrorMapper.register()`.
 3. **Freezed unions & ActionGuard:** State classes are Freezed unions. Cubits/Blocs use `ActionGuard` for every async operation, supporting duplicate key rejection (`Failure.duplicate`) and cooperative cancellation via `ActionToken`. `ActionGuard` does not access the service locator directly.
-4. **Registration:** Repository impls use `@LazySingleton(as: I<Feature>Repository)`. Cubits/Blocs use `@injectable`. Run codegen after changes.
+4. **Registration:** Repository impls use `@LazySingleton(as: <Feature>Repository)`. Cubits/Blocs use `@injectable`. Run codegen after changes.
 5. **Zero cross-feature imports:** Features never import other features. `lib/core/` never imports `lib/features/` (except the central `lib/core/routes/route_providers.dart` assembly root). Code needed by 2+ features moves to `lib/core/` immediately.
 6. **Thin screens:** Screens only read state, call Cubit methods, and render. UI files never import repository interfaces, repository implementations, or `core/di/injection.dart`.
 7. **L10n & Central routing:** All user-facing strings go through `l10n` (en + ar). Routes are declared in `RouteNames` and `AppRouter`. Protected routes are listed in `RouteNames.protectedRoutes` and enforced via pluggable `IAuthRedirect`. Invalid/missing route arguments route to 404 (`buildNotFoundRoute`).
@@ -59,9 +59,9 @@ lib/features/<feature_name>/
 
 ## 5. Reference Implementation
 Always inspect and mirror `lib/features/example/`:
-- Model: `features/example/data/models/item_dto.dart`
+- Model: `features/example/data/models/item_model.dart`
 - Data Source: `features/example/data/datasources/item_remote_data_source.dart`
-- Repository: `features/example/data/repositories/i_item_repository.dart`
+- Repository: `features/example/data/repositories/item_repository.dart`
 - Cubit: `features/example/cubit/example_cubit.dart`
 - Bloc: `features/example/bloc/example_detail_bloc.dart`
 - UI: `features/example/ui/example_screen.dart`
@@ -70,7 +70,8 @@ Always inspect and mirror `lib/features/example/`:
 ## 6. Naming Conventions
 - **Files:** `snake_case.dart` (e.g., `item_repository_impl.dart`).
 - **Classes:** `PascalCase` (e.g., `ItemRepositoryImpl`).
-- **Interfaces:** Prefix with `I` (e.g., `IItemRepository`).
+- **Interfaces:** Standard Flutter naming without `I` prefix; the implementation class appends `Impl` (e.g., `ItemRepository` interface, `ItemRepositoryImpl` implementation; `ItemRemoteDataSource` interface, `ItemRemoteDataSourceImpl` implementation).
+- **Models:** Suffix with `_model.dart` and class name `*Model` (e.g., `item_model.dart`, `ItemModel`).
 - **States:** Freezed unions (e.g., `ExampleState.initial()`, `ExampleState.loaded()`).
 - **Routes:** `RouteNames.exampleDetail = '/example-detail'`.
 - **L10n keys:** `camelCase` (e.g., `exampleTitle`, `errorNetwork`).

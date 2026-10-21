@@ -16,8 +16,8 @@ dev_dependencies:
 ## 2. Architecture & Cache-First Pattern
 
 When using local caching with Drift, the feature repository remains the seam:
-1. `IItemRepository` returns `Result<List<ItemDto>>`.
+1. `ItemRepository` returns `Result<List<ItemModel>>`.
 2. `CachedItemRepositoryImpl` reads from `AppDatabase.itemsDao` first.
 3. If fresh cache exists, emits/returns immediately.
-4. Queries remote API (`IItemRemoteDataSource`), updates SQLite, and returns updated data.
+4. Queries remote API (`ItemRemoteDataSource`), updates SQLite, and returns updated data.
 5. If remote call fails while offline, returns cached data safely without surfacing network errors to the UI.

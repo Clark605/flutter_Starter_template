@@ -13,7 +13,7 @@ A key guarantee of `flutter_starter` is that the presentation layer (`cubit/`, `
                │ Calls repository interface
                ▼
    ┌───────────────────────┐
-   │  IItemRepository      │ ◄─── Strict Seam
+   │   ItemRepository      │ ◄─── Strict Seam
    │  (Returns Result<T>)  │
    └───────────┬───────────┘
                │ Implemented by
@@ -25,7 +25,7 @@ A key guarantee of `flutter_starter` is that the presentation layer (`cubit/`, `
                            │ Delegates to
                            ▼
           ┌───────────────────────────────────┐
-          │     IItemRemoteDataSource         │
+          │      ItemRemoteDataSource         │
           └─┬──────────────┬───────────────┬──┘
             │              │               │
      REST (Dio)       Firebase         Supabase / GraphQL
@@ -43,14 +43,14 @@ Fully implemented in the base template with timeouts, JSON headers, retry-with-b
 
 ### B. Cloud Firestore (Firebase)
 - Reference: `optional_modules/backend_firebase/`
-- Implements `IItemRemoteDataSource` using `FirebaseFirestore.instance.collection(...)`.
+- Implements `ItemRemoteDataSource` using `FirebaseFirestore.instance.collection(...)`.
 - Repository catches `FirebaseException` and maps via `ErrorMapper`.
 
 ### C. Supabase
 - Reference: `optional_modules/backend_supabase/`
-- Implements `IItemRemoteDataSource` using `SupabaseClient.from(...).select()`.
+- Implements `ItemRemoteDataSource` using `SupabaseClient.from(...).select()`.
 - Repository catches `PostgrestException` and maps via `ErrorMapper`.
 
 ### D. GraphQL
 - Reference: `optional_modules/backend_graphql/`
-- Implements `IItemRemoteDataSource` with typed GraphQL queries and mutations via `GraphQLClient`.
+- Implements `ItemRemoteDataSource` with typed GraphQL queries and mutations via `GraphQLClient`.

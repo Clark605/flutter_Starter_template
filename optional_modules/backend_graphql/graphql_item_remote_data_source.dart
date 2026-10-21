@@ -1,12 +1,12 @@
 // Copy to lib/features/example/data/datasources/graphql_item_remote_data_source.dart when graphql_flutter is added.
 /*
 import 'package:flutter_starter/features/example/data/datasources/item_remote_data_source.dart';
-import 'package:flutter_starter/features/example/data/models/item_dto.dart';
+import 'package:flutter_starter/features/example/data/models/item_model.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:injectable/injectable.dart';
 
-@LazySingleton(as: IItemRemoteDataSource)
-class GraphQLItemRemoteDataSourceImpl implements IItemRemoteDataSource {
+@LazySingleton(as: ItemRemoteDataSource)
+class GraphQLItemRemoteDataSourceImpl implements ItemRemoteDataSource {
   final GraphQLClient _client;
 
   GraphQLItemRemoteDataSourceImpl(this._client);
@@ -23,7 +23,7 @@ class GraphQLItemRemoteDataSourceImpl implements IItemRemoteDataSource {
   ''';
 
   @override
-  Future<List<ItemDto>> getItems({int page = 1, int limit = 20}) async {
+  Future<List<ItemModel>> getItems({int page = 1, int limit = 20}) async {
     final result = await _client.query(
       QueryOptions(
         document: gql(_getItemsQuery),
@@ -39,16 +39,16 @@ class GraphQLItemRemoteDataSourceImpl implements IItemRemoteDataSource {
     }
 
     final data = result.data?['items'] as List?;
-    return data?.map((item) => ItemDto.fromJson(item as Map<String, dynamic>)).toList() ?? [];
+    return data?.map((item) => ItemModel.fromJson(item as Map<String, dynamic>)).toList() ?? [];
   }
 
   @override
-  Future<ItemDto> getItem(int id) async {
+  Future<ItemModel> getItem(int id) async {
     throw UnimplementedError();
   }
 
   @override
-  Future<ItemDto> createItem({required String title, required String body}) async {
+  Future<ItemModel> createItem({required String title, required String body}) async {
     throw UnimplementedError();
   }
 }

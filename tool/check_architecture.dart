@@ -48,6 +48,27 @@ void main(List<String> args) {
         normalizedPath.contains('/widgets/screens/');
     final isCore = normalizedPath.startsWith('lib/core/');
 
+    // Check naming conventions for features
+    if (currentFeature != null) {
+      final fileName = normalizedPath.split('/').last;
+      if (normalizedPath.contains('/data/models/')) {
+        if (fileName.endsWith('_dto.dart') ||
+            !fileName.endsWith('_model.dart')) {
+          violations.add(
+            '$normalizedPath: [Naming Convention] File "$fileName" in data/models/ must follow standard Flutter naming "*_model.dart".',
+          );
+        }
+      }
+      if (normalizedPath.contains('/data/repositories/') ||
+          normalizedPath.contains('/data/datasources/')) {
+        if (fileName.startsWith('i_')) {
+          violations.add(
+            '$normalizedPath: [Naming Convention] File "$fileName" should not use "i_" prefix. The name without "impl" is the interface (e.g. "${currentFeature}_repository.dart").',
+          );
+        }
+      }
+    }
+
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i];
       final lineNum = i + 1;
@@ -180,7 +201,7 @@ void main(List<String> args) {
 void _printRules() {
   stdout.writeln('Architecture Rules (Golden Rules Enforcement):');
   stdout.writeln(
-    '  Rule 1: No domain layer - Cubits/Blocs depend on repository interfaces (data/repositories/i_*), never on data sources (data/datasources/) or concrete implementations (*_impl.dart).',
+    '  Rule 1: No domain layer - Cubits/Blocs depend on repository interfaces (data/repositories/<feature>_repository.dart), never on data sources (data/datasources/) or concrete implementations (*_impl.dart).',
   );
   stdout.writeln(
     '  Rule 2: Result types - UI never sees transport types (Dio/Firebase/Supabase/GraphQL). Errors are converted to Failure.',

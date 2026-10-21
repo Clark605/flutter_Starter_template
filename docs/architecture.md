@@ -63,14 +63,14 @@ In `flutter_starter`:
 ```dart
 @injectable
 class ExampleCubit extends BaseCubit<ExampleState> {
-  final IItemRepository _repository;
+  final ItemRepository _repository;
 
   ExampleCubit(this._repository) : super(const ExampleState.initial());
 
   Future<void> loadItems({ActionToken? token}) async {
     emit(const ExampleState.loading());
 
-    final result = await guard<List<ItemDto>>(
+    final result = await guard<List<ItemModel>>(
       () async {
         final repoResult = await _repository.getItems(page: 1, limit: 10);
         return repoResult.fold((items) => items, (failure) => throw failure);
@@ -97,7 +97,7 @@ class ExampleCubit extends BaseCubit<ExampleState> {
 @injectable
 class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
     with ActionGuard<ExampleDetailState> {
-  final IItemRepository _repository;
+  final ItemRepository _repository;
 
   ExampleDetailBloc(this._repository) : super(const ExampleDetailState.initial()) {
     on<ExampleDetailEvent>((event, emit) async {
@@ -111,7 +111,7 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
   Future<void> _onLoad(int id, Emitter<ExampleDetailState> emit, {ActionToken? token}) async {
     emit(const ExampleDetailState.loading());
 
-    final result = await guard<ItemDto>(
+    final result = await guard<ItemModel>(
       () async {
         final res = await _repository.getItem(id);
         return res.fold((item) => item, (failure) => throw failure);
@@ -142,10 +142,10 @@ import 'package:flutter_starter/core/network/dio_token_adapter.dart';
 import 'package:flutter_starter/core/utils/action_token.dart';
 
 // In data source implementation:
-Future<ItemDto> fetchItem(int id, {ActionToken? actionToken}) async {
+Future<ItemModel> fetchItem(int id, {ActionToken? actionToken}) async {
   final dioCancelToken = actionToken?.toDioCancelToken();
   final response = await _dio.get('/items/$id', cancelToken: dioCancelToken);
-  return ItemDto.fromJson(response.data);
+  return ItemModel.fromJson(response.data);
 }
 ```
 

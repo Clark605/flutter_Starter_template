@@ -1,6 +1,6 @@
 # Backend Variant: GraphQL
 
-Demonstrates swapping the REST (Dio) datasource with GraphQL queries and mutations while keeping `IItemRepository`, `ExampleCubit`, and the UI 100% unchanged.
+Demonstrates swapping the REST (Dio) datasource with GraphQL queries and mutations while keeping `ItemRepository`, `ExampleCubit`, and the UI 100% unchanged.
 
 ## 1. Dependencies to Add to `pubspec.yaml`
 
@@ -41,8 +41,8 @@ ErrorMapper.register(mapGraphQLException);
 
 ## 3. Architecture Swap Point
 
-1. Provide `GraphQLItemRemoteDataSourceImpl` implementing `IItemRemoteDataSource`.
-2. Register it with `@LazySingleton(as: IItemRemoteDataSource)`.
-3. Wrap GraphQL queries inside the data source and return `ItemDto`.
+1. Provide `GraphQLItemRemoteDataSourceImpl` implementing `ItemRemoteDataSource`.
+2. Register it with `@LazySingleton(as: ItemRemoteDataSource)`.
+3. Wrap GraphQL queries inside the data source and return `ItemModel`.
 4. Register the error mapper with `ErrorMapper.register(mapGraphQLException)`.
 5. The repository and presentation layers remain backend-agnostic.

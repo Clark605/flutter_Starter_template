@@ -158,9 +158,9 @@ lib/
 └── features/
     └── example/                   # Complete reference feature implementation
         ├── data/
-        │   ├── models/            # Freezed ItemDto
-        │   ├── datasources/       # ItemRemoteDataSource
-        │   └── repositories/      # IItemRepository & ItemRepositoryImpl
+        │   ├── models/            # Freezed ItemModel
+        │   ├── datasources/       # ItemRemoteDataSource & ItemRemoteDataSourceImpl
+        │   └── repositories/      # ItemRepository & ItemRepositoryImpl
         ├── cubit/                 # ExampleCubit & ExampleState
         ├── bloc/                  # ExampleDetailBloc, Event & State
         └── ui/                    # ExampleScreen, ExampleDetailScreen, ExampleDetailArgs & ItemCard

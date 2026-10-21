@@ -128,7 +128,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ItemDto> items,  bool hasMore,  bool isLoadingMore,  int page)?  loaded,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ItemModel> items,  bool hasMore,  bool isLoadingMore,  int page)?  loaded,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ExampleStateInitial() when initial != null:
 return initial();case ExampleStateLoading() when loading != null:
@@ -152,7 +152,7 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ItemDto> items,  bool hasMore,  bool isLoadingMore,  int page)  loaded,required TResult Function( Failure failure)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ItemModel> items,  bool hasMore,  bool isLoadingMore,  int page)  loaded,required TResult Function( Failure failure)  error,}) {final _that = this;
 switch (_that) {
 case ExampleStateInitial():
 return initial();case ExampleStateLoading():
@@ -175,7 +175,7 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ItemDto> items,  bool hasMore,  bool isLoadingMore,  int page)?  loaded,TResult? Function( Failure failure)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ItemModel> items,  bool hasMore,  bool isLoadingMore,  int page)?  loaded,TResult? Function( Failure failure)?  error,}) {final _that = this;
 switch (_that) {
 case ExampleStateInitial() when initial != null:
 return initial();case ExampleStateLoading() when loading != null:
@@ -257,11 +257,11 @@ String toString() {
 
 
 class ExampleStateLoaded implements ExampleState {
-  const ExampleStateLoaded({required final  List<ItemDto> items, this.hasMore = true, this.isLoadingMore = false, this.page = 1}): _items = items;
+  const ExampleStateLoaded({required final  List<ItemModel> items, this.hasMore = true, this.isLoadingMore = false, this.page = 1}): _items = items;
   
 
- final  List<ItemDto> _items;
- List<ItemDto> get items {
+ final  List<ItemModel> _items;
+ List<ItemModel> get items {
   if (_items is EqualUnmodifiableListView) return _items;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_items);
@@ -301,7 +301,7 @@ abstract mixin class $ExampleStateLoadedCopyWith<$Res> implements $ExampleStateC
   factory $ExampleStateLoadedCopyWith(ExampleStateLoaded value, $Res Function(ExampleStateLoaded) _then) = _$ExampleStateLoadedCopyWithImpl;
 @useResult
 $Res call({
- List<ItemDto> items, bool hasMore, bool isLoadingMore, int page
+ List<ItemModel> items, bool hasMore, bool isLoadingMore, int page
 });
 
 
@@ -321,7 +321,7 @@ class _$ExampleStateLoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? hasMore = null,Object? isLoadingMore = null,Object? page = null,}) {
   return _then(ExampleStateLoaded(
 items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<ItemDto>,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+as List<ItemModel>,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
 as bool,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
 as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,

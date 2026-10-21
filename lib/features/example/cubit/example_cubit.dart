@@ -3,13 +3,13 @@ import 'package:flutter_starter/core/errors/failure.dart';
 import 'package:flutter_starter/core/errors/result.dart';
 import 'package:flutter_starter/core/utils/action_token.dart';
 import 'package:flutter_starter/features/example/cubit/example_state.dart';
-import 'package:flutter_starter/features/example/data/models/item_dto.dart';
-import 'package:flutter_starter/features/example/data/repositories/i_item_repository.dart';
+import 'package:flutter_starter/features/example/data/models/item_model.dart';
+import 'package:flutter_starter/features/example/data/repositories/item_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class ExampleCubit extends BaseCubit<ExampleState> {
-  final IItemRepository _repository;
+  final ItemRepository _repository;
   static const int _pageSize = 10;
 
   ExampleCubit(this._repository) : super(const ExampleState.initial());
@@ -17,7 +17,7 @@ class ExampleCubit extends BaseCubit<ExampleState> {
   Future<void> loadItems({ActionToken? token}) async {
     emit(const ExampleState.loading());
 
-    final result = await guard<List<ItemDto>>(
+    final result = await guard<List<ItemModel>>(
       () async {
         final repoResult = await _repository.getItems(
           page: 1,
@@ -49,7 +49,7 @@ class ExampleCubit extends BaseCubit<ExampleState> {
   }
 
   Future<void> refresh({ActionToken? token}) async {
-    final result = await guard<List<ItemDto>>(
+    final result = await guard<List<ItemModel>>(
       () async {
         final repoResult = await _repository.getItems(
           page: 1,
@@ -93,7 +93,7 @@ class ExampleCubit extends BaseCubit<ExampleState> {
     emit(currentState.copyWith(isLoadingMore: true));
     final nextPage = currentState.page + 1;
 
-    final result = await guard<List<ItemDto>>(
+    final result = await guard<List<ItemModel>>(
       () async {
         final repoResult = await _repository.getItems(
           page: nextPage,
@@ -122,12 +122,12 @@ class ExampleCubit extends BaseCubit<ExampleState> {
     );
   }
 
-  Future<Result<ItemDto>> createItem({
+  Future<Result<ItemModel>> createItem({
     required String title,
     required String body,
     ActionToken? token,
   }) async {
-    return guard<ItemDto>(
+    return guard<ItemModel>(
       () async {
         final repoResult = await _repository.createItem(
           title: title,

@@ -128,7 +128,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( ItemDto item)?  loaded,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( ItemModel item)?  loaded,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -152,7 +152,7 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( ItemDto item)  loaded,required TResult Function( Failure failure)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( ItemModel item)  loaded,required TResult Function( Failure failure)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
@@ -175,7 +175,7 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( ItemDto item)?  loaded,TResult? Function( Failure failure)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( ItemModel item)?  loaded,TResult? Function( Failure failure)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
@@ -260,7 +260,7 @@ class _Loaded implements ExampleDetailState {
   const _Loaded(this.item);
   
 
- final  ItemDto item;
+ final  ItemModel item;
 
 /// Create a copy of ExampleDetailState
 /// with the given fields replaced by the non-null parameter values.
@@ -292,11 +292,11 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $ExampleDetailStateCopyWi
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- ItemDto item
+ ItemModel item
 });
 
 
-$ItemDtoCopyWith<$Res> get item;
+$ItemModelCopyWith<$Res> get item;
 
 }
 /// @nodoc
@@ -312,7 +312,7 @@ class __$LoadedCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? item = null,}) {
   return _then(_Loaded(
 null == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
-as ItemDto,
+as ItemModel,
   ));
 }
 
@@ -320,9 +320,9 @@ as ItemDto,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ItemDtoCopyWith<$Res> get item {
+$ItemModelCopyWith<$Res> get item {
   
-  return $ItemDtoCopyWith<$Res>(_self.item, (value) {
+  return $ItemModelCopyWith<$Res>(_self.item, (value) {
     return _then(_self.copyWith(item: value));
   });
 }

@@ -30,7 +30,7 @@ class AppConfig {
   );
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://jsonplaceholder.typicode.com',
+    defaultValue: 'https://dummyjson.com',
   );
   static const int connectTimeoutSeconds = int.fromEnvironment(
     'CONNECT_TIMEOUT_SECONDS',
