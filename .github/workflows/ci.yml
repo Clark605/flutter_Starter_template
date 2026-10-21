@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Lint, Analyze & Architecture Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.1'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify code formatting
+        run: dart format --set-exit-if-changed .
+
+      - name: Verify architecture boundaries
+        run: dart run tool/check_architecture.dart
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Build Dev APK
+        run: flutter build apk --flavor dev -t lib/main.dart --dart-define-from-file=env/dev.json
