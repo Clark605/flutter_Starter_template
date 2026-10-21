@@ -1,11 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_starter/core/di/injection.dart';
 import 'package:flutter_starter/core/l10n/l10n_extension.dart';
 import 'package:flutter_starter/core/routes/app_navigator.dart';
 import 'package:flutter_starter/core/routes/route_names.dart';
-import 'package:flutter_starter/core/storage/prefs_service.dart';
 import 'package:flutter_starter/core/theme/app_durations.dart';
 import 'package:flutter_starter/core/theme/app_icon_size.dart';
 import 'package:flutter_starter/core/theme/app_radius.dart';
@@ -13,7 +10,9 @@ import 'package:flutter_starter/core/theme/app_spacing.dart';
 import 'package:flutter_starter/core/widgets/app_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  final Future<void> Function()? onComplete;
+
+  const OnboardingScreen({super.key, this.onComplete});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -30,9 +29,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _completeOnboarding() async {
-    final prefs = getIt<PrefsService>();
-    await prefs.setHasSeenOnboarding(true);
-    unawaited(AppNavigator.pushReplacementNamed(RouteNames.home));
+    if (widget.onComplete != null) {
+      await widget.onComplete!();
+    } else {
+      unawaited(AppNavigator.pushReplacementNamed(RouteNames.home));
+    }
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_starter/core/cubit/connectivity_cubit.dart';
-import 'package:flutter_starter/core/di/injection.dart';
 import 'package:flutter_starter/core/l10n/l10n_extension.dart';
 import 'package:flutter_starter/core/theme/app_icon_size.dart';
 import 'package:flutter_starter/core/theme/app_spacing.dart';
@@ -51,8 +51,10 @@ class NoInternetScreen extends StatelessWidget {
                 icon: Icons.refresh_rounded,
                 isExpanded: false,
                 onPressed: () {
-                  if (getIt.isRegistered<ConnectivityCubit>()) {
-                    getIt<ConnectivityCubit>().refresh();
+                  try {
+                    context.read<ConnectivityCubit>().refresh();
+                  } on Object catch (_) {
+                    // Cubit might not be in context in standalone tests
                   }
                   onRetry?.call();
                 },

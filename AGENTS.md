@@ -1,7 +1,7 @@
 # Agent Guidelines & Engineering Standards
 
 ## 1. Project Overview
-`flutter_starter` is a production-grade, reusable Flutter starter template targeting Android, iOS, and Web. Built with Dart 3.11+ and Flutter 3.41+, it employs `flutter_bloc` (Bloc & Cubit), Freezed 3, Injectable DI, Dio networking with resilient guarded actions, Material 3 theming with full English and Arabic (RTL) localization, and native multi-flavor environments (`dev`, `staging`, `prod`).
+`flutter_starter` is a production-grade, reusable Flutter starter template targeting Android and iOS (Web optional). Built with Dart 3.11+ and Flutter 3.41.1, it employs `flutter_bloc` (Bloc & Cubit), Freezed 3, Injectable DI, Dio networking with resilient guarded actions, Material 3 theming with full English and Arabic (RTL) localization, and native multi-flavor environments (`dev`, `staging`, `prod`).
 
 ## 2. Architecture & The 8 Golden Rules
 Every feature lives in `lib/features/<feature_name>/`:
@@ -19,35 +19,35 @@ lib/features/<feature_name>/
 
 ### The 8 Rules:
 1. **No domain layer:** Cubits/Blocs depend on the repository interface (`data/repositories/i_*`), never on the implementation or a data source.
-2. **Result types:** Repositories return `Result<T>`. Data sources throw; the repository converts errors to `Failure`. UI never sees Dio/Firebase/Supabase/GraphQL types.
-3. **Freezed unions & ActionGuard:** State classes are Freezed unions. Cubits/Blocs use `ActionGuard` mixin for every async operation.
+2. **Result types & backend-agnostic:** Repositories return `Result<T>`. Data sources throw; the repository converts errors to `Failure`. UI never sees transport packages (Dio, Firebase, Supabase, GraphQL). `ErrorMapper` uses pluggable mappers registered via `ErrorMapper.register()`.
+3. **Freezed unions & ActionGuard:** State classes are Freezed unions. Cubits/Blocs use `ActionGuard` for every async operation, supporting duplicate key rejection (`Failure.duplicate`) and cooperative cancellation via `ActionToken`. `ActionGuard` does not access the service locator directly.
 4. **Registration:** Repository impls use `@LazySingleton(as: I<Feature>Repository)`. Cubits/Blocs use `@injectable`. Run codegen after changes.
-5. **Zero cross-feature imports:** Features never import other features. Code needed by 2+ features moves to `lib/core/` immediately.
-6. **Thin screens:** Screens read state, call Cubit methods, and render. No business logic, no direct repository calls.
-7. **L10n & Central routing:** All user-facing strings go through `l10n` (en + ar). All routes are added to `route_names.dart` and `app_router.dart`.
-8. **Design tokens:** UI strictly follows mobile-first rules and theme tokens (no hardcoded colors, sizes, or text styles).
+5. **Zero cross-feature imports:** Features never import other features. `lib/core/` never imports `lib/features/` (except the central `lib/core/routes/route_providers.dart` assembly root). Code needed by 2+ features moves to `lib/core/` immediately.
+6. **Thin screens:** Screens only read state, call Cubit methods, and render. UI files never import repository interfaces, repository implementations, or `core/di/injection.dart`.
+7. **L10n & Central routing:** All user-facing strings go through `l10n` (en + ar). Routes are declared in `RouteNames` and `AppRouter`. Protected routes are listed in `RouteNames.protectedRoutes` and enforced via pluggable `IAuthRedirect`. Invalid/missing route arguments route to 404 (`buildNotFoundRoute`).
+8. **Design tokens & logging:** UI strictly follows mobile-first rules and theme tokens (no hardcoded colors, sizes, or text styles). No raw `print()` calls in app code; use `AppLogger`.
 
 ## 3. Directory Map (`lib/core/`)
 - `config/`: Compile-time environment settings (`AppConfig`).
 - `constants/`: Global constants (`StorageKeys`, `ApiConstants`).
 - `di/`: Dependency injection setup (`injection.dart`).
-- `errors/`: Error hierarchy (`AppException`, `Failure`, `Result<T>`, `ErrorMapper`).
-- `network/`: Dio client, interceptors (`auth`, `retry`, `logging`), and `TokenProvider`.
+- `errors/`: Error hierarchy (`AppException`, `Failure`, `Result<T>`, pluggable `ErrorMapper`).
+- `network/`: Dio client, interceptors (`auth`, `retry`, `logging`), `dio_error_mapper`, and `TokenProvider`.
 - `observability/`: Crash reporting, analytics, remote config interfaces & `ForceUpdateGate`.
 - `routes/`: Routing infrastructure (`AppRouter`, `AppNavigator`, `RouteNames`, `RouteProviders`).
 - `services/`: Platform utilities (`ConnectivityService`).
 - `storage/`: `PrefsService`, `SecureStorageService`.
 - `theme/`: Theme tokens (`AppSpacing`, `AppRadius`, `AppColors`, `AppTypography`, `Breakpoints`).
-- `utils/`: `AppLogger`, `ResponsiveLayout`, `PaginationState`, `FormValidators`.
+- `utils/`: `AppLogger`, `ActionToken`, `ResponsiveLayout`, `PaginationState`, `FormValidators`.
 - `widgets/`: Shared design system widgets (`AppButton`, `AppTextField`, `AppAvatar`, `StatusBadge`).
 
 ## 4. Mandatory New-Feature Checklist
 1. Create the feature directory structure as shown in Section 2.
-2. Model (Freezed) $\to$ Data Source $\to$ Repository Interface $\to$ Repository Impl.
-3. State (Freezed union) $\to$ Cubit/Bloc extending `BaseCubit` or using `ActionGuard`.
-4. Screen and private widgets using `lib/core/widgets/` and theme tokens.
+2. Model (Freezed) -> Data Source -> Repository Interface -> Repository Impl.
+3. State (Freezed union) -> Cubit/Bloc extending `BaseCubit` or using `ActionGuard`.
+4. Screen and private widgets using `lib/core/widgets/` and theme tokens. Screens consume Cubit via context.
 5. Add localized strings in `l10n/app_en.arb` and `l10n/app_ar.arb`.
-6. Add route name in `route_names.dart`, provider in `route_providers.dart`, and route in `app_router.dart`.
+6. Add route name in `route_names.dart`, typed args in `ui/`, provider in `route_providers.dart`, and route in `app_router.dart`.
 7. Run validation pipeline:
    ```bash
    dart run build_runner build --delete-conflicting-outputs
@@ -65,6 +65,7 @@ Always inspect and mirror `lib/features/example/`:
 - Cubit: `features/example/cubit/example_cubit.dart`
 - Bloc: `features/example/bloc/example_detail_bloc.dart`
 - UI: `features/example/ui/example_screen.dart`
+- Args: `features/example/ui/example_detail_args.dart`
 
 ## 6. Naming Conventions
 - **Files:** `snake_case.dart` (e.g., `item_repository_impl.dart`).
@@ -76,17 +77,20 @@ Always inspect and mirror `lib/features/example/`:
 
 ## 7. Do / Don't Rules
 - ❌ **DON'T** import another feature from `lib/features/<feature>/`.
-- ❌ **DON'T** import `_impl.dart` or `datasources/` in Cubits/Blocs.
+- ❌ **DON'T** import `lib/features/**` from `lib/core/**` (except `route_providers.dart`).
+- ❌ **DON'T** import `_impl.dart`, `datasources/`, or `repositories/` in UI.
+- ❌ **DON'T** import `core/di/injection.dart` in UI.
 - ❌ **DON'T** call `print()`. Use `AppLogger.debug/info/warning/error`.
 - ❌ **DON'T** hardcode user strings, colors, or raw paddings.
 - ❌ **DON'T** use raw `try/catch` in Cubit/Bloc. Use `guard()`.
 - ❌ **DON'T** emit after close. `BaseCubit` and `ActionGuard` handle this.
 - ✅ **DO** return `Result<T>` from repositories.
-- ✅ **DO** ensure touch targets $\ge$ 48px.
+- ✅ **DO** ensure touch targets >= 48px.
 - ✅ **DO** test both English and Arabic RTL layouts.
+- ✅ **DO** use `// architecture-ignore: <rule> <reason>` for documented exceptions.
 
 ## 8. Mobile-First UI Rules
-- Touch targets must be $\ge$ 48px in height/width (`AppSpacing.minTouchTarget`).
+- Touch targets must be >= 48px in height/width (`AppSpacing.minTouchTarget`).
 - Page margins: 16px (`AppSpacing.lg` / `AppSpacing.edgeInsetsPage`).
 - Use modal bottom sheets for mobile actions and pickers.
 - Wrap pages in `SafeArea`.
@@ -106,6 +110,7 @@ flutter analyze
 
 # Architecture validation
 dart run tool/check_architecture.dart
+dart run tool/check_architecture.dart --list-rules
 
 # Launcher icons per flavor
 dart run flutter_launcher_icons -f flutter_launcher_icons-dev.yaml

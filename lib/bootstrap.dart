@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_starter/app.dart';
 import 'package:flutter_starter/core/config/app_config.dart';
+import 'package:flutter_starter/core/cubit/action_guard.dart';
 import 'package:flutter_starter/core/di/injection.dart';
+import 'package:flutter_starter/core/errors/error_mapper.dart';
+import 'package:flutter_starter/core/network/dio_error_mapper.dart';
 import 'package:flutter_starter/core/observability/crash_reporter.dart';
 import 'package:flutter_starter/core/observability/force_update_gate.dart';
 import 'package:flutter_starter/core/observability/remote_config_service.dart';
@@ -78,6 +81,9 @@ Future<void> bootstrap() async {
   Object? initialRouteArgs;
 
   try {
+    // 0. Register core transport error mappers
+    ErrorMapper.register(mapDioException);
+
     // 1. Initialize dependency injection
     await configureDependencies();
 
@@ -86,6 +92,7 @@ Future<void> bootstrap() async {
       final crashReporter = getIt<ICrashReporter>();
       await crashReporter.init();
       isCrashReporterReady = true;
+      ActionGuardConfig.crashReporter = crashReporter;
 
       for (final buffered in preInitErrors) {
         await crashReporter.recordError(

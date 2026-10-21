@@ -154,10 +154,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorNotFound => 'The requested resource was not found.';
 
   @override
+  String get errorConflict =>
+      'A conflict occurred with the current state of the resource. Please refresh and try again.';
+
+  @override
   String get errorValidation => 'The provided information is invalid.';
 
   @override
   String get errorServer => 'A server error occurred. Please try again later.';
+
+  @override
+  String get errorDuplicate =>
+      'This action is already in progress. Please wait.';
 
   @override
   String get errorCancelled => 'The operation was cancelled.';

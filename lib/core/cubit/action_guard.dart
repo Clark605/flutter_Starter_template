@@ -1,30 +1,43 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_starter/core/di/injection.dart';
 import 'package:flutter_starter/core/errors/error_mapper.dart';
 import 'package:flutter_starter/core/errors/failure.dart';
 import 'package:flutter_starter/core/errors/result.dart';
 import 'package:flutter_starter/core/observability/crash_reporter.dart';
+import 'package:flutter_starter/core/utils/action_token.dart';
 import 'package:flutter_starter/core/utils/app_logger.dart';
+
+/// Configuration hook for [ActionGuard].
+///
+/// Configured during bootstrap so [ActionGuard] does not access the service locator directly.
+class ActionGuardConfig {
+  ActionGuardConfig._();
+
+  /// Global crash reporter hook used by [ActionGuard] to forward unexpected errors.
+  static ICrashReporter? crashReporter;
+}
 
 /// Mixin for [BlocBase] (Cubits and Blocs) that provides resilient, guarded async operations.
 ///
 /// Replaces legacy SafeActionCubit with:
 /// - Explicit [Result<T>] returns (never ambiguous null).
 /// - Central exception mapping via [ErrorMapper].
-/// - Closed-state and cancellation safety.
-/// - Double-submit / re-entrancy prevention via action [key].
+/// - Closed-state and cooperative cancellation via [ActionToken].
+/// - Double-submit / re-entrancy prevention via action [key] (returning [Failure.duplicate]).
 /// - Exponential backoff retry support for transient errors.
-/// - Release-safe logging and unexpected error forwarding to [ICrashReporter].
+/// - Release-safe logging and unexpected error forwarding via [ActionGuardConfig.crashReporter].
 mixin ActionGuard<S> on BlocBase<S> {
   final Set<String> _inFlightActionKeys = <String>{};
 
   /// Guards an async [action], catching all errors and returning a typed [Result<T>].
   ///
   /// [key]: Optional unique key. If provided and an action with this key is already
-  /// running, the call is rejected to prevent double-submit.
+  /// running, the call is rejected returning [Failure.duplicate] to prevent double-submit.
   ///
-  /// [retries]: Number of retry attempts for transient (network/timeout) failures.
+  /// [token]: Optional [ActionToken] checked before execution, after completion,
+  /// and between retry intervals. When cancelled, returns [Failure.cancelled].
+  ///
+  /// [retries]: Number of retry attempts for transient failures.
   /// Defaults to 0 (no retries).
   ///
   /// [retryDelay]: Initial delay before the first retry. Doubles on each attempt.
@@ -34,6 +47,7 @@ mixin ActionGuard<S> on BlocBase<S> {
   Future<Result<T>> guard<T>(
     Future<T> Function() action, {
     String? key,
+    ActionToken? token,
     int retries = 0,
     Duration retryDelay = const Duration(milliseconds: 500),
     Emitter<S>? emitter,
@@ -43,13 +57,16 @@ mixin ActionGuard<S> on BlocBase<S> {
   }) async {
     final tag = logTag ?? runtimeType.toString();
 
+    // Check cancellation before starting
+    if (token?.isCancelled ?? false) {
+      return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
+    }
+
     // Prevent duplicate concurrent execution of the same action
     if (key != null) {
       if (_inFlightActionKeys.contains(key)) {
         AppLogger.debug('Rejected duplicate action for key: $key', tag: tag);
-        return const Result.failure(
-          Failure.cancelled(code: 'DUPLICATE_ACTION'),
-        );
+        return const Result.failure(Failure.duplicate());
       }
       _inFlightActionKeys.add(key);
     }
@@ -60,12 +77,18 @@ mixin ActionGuard<S> on BlocBase<S> {
         if (isClosed || (emitter != null && emitter.isDone)) {
           return const Result.failure(Failure.cancelled(code: 'CLOSED'));
         }
+        if (token?.isCancelled ?? false) {
+          return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
+        }
 
         try {
           final data = await action();
 
           if (isClosed || (emitter != null && emitter.isDone)) {
             return const Result.failure(Failure.cancelled(code: 'CLOSED'));
+          }
+          if (token?.isCancelled ?? false) {
+            return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
           }
 
           onSuccess?.call(data);
@@ -75,6 +98,10 @@ mixin ActionGuard<S> on BlocBase<S> {
 
           // Retry logic for transient failures
           if (attempt < retries && failure.isRetryable) {
+            if (token?.isCancelled ?? false) {
+              return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
+            }
+
             attempt++;
             final delay = retryDelay * (1 << (attempt - 1));
             AppLogger.warning(
@@ -82,6 +109,10 @@ mixin ActionGuard<S> on BlocBase<S> {
               tag: tag,
             );
             await Future<void>.delayed(delay);
+
+            if (token?.isCancelled ?? false) {
+              return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
+            }
             continue;
           }
 
@@ -107,6 +138,11 @@ mixin ActionGuard<S> on BlocBase<S> {
       return;
     }
 
+    if (failure is DuplicateFailure) {
+      AppLogger.debug('Duplicate action rejected in $tag', tag: tag);
+      return;
+    }
+
     if (failure is UnknownFailure) {
       AppLogger.error(
         'Unexpected failure in $tag: ${failure.code}',
@@ -114,9 +150,11 @@ mixin ActionGuard<S> on BlocBase<S> {
         error: failure.originalError,
         stackTrace: failure.stackTrace,
       );
-      if (getIt.isRegistered<ICrashReporter>()) {
+
+      final reporter = ActionGuardConfig.crashReporter;
+      if (reporter != null) {
         unawaited(
-          getIt<ICrashReporter>().recordError(
+          reporter.recordError(
             failure.originalError ?? Exception(failure.code),
             failure.stackTrace,
             reason: 'Unknown failure in $tag',

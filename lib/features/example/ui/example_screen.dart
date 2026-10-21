@@ -13,6 +13,7 @@ import 'package:flutter_starter/core/widgets/infinite_scroll_list.dart';
 import 'package:flutter_starter/features/example/cubit/example_cubit.dart';
 import 'package:flutter_starter/features/example/cubit/example_state.dart';
 import 'package:flutter_starter/features/example/data/models/item_dto.dart';
+import 'package:flutter_starter/features/example/ui/example_detail_args.dart';
 import 'package:flutter_starter/features/example/ui/widgets/item_card.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -144,7 +145,7 @@ class ExampleScreen extends StatelessWidget {
                   onTap: () {
                     AppNavigator.pushNamed(
                       RouteNames.exampleDetail,
-                      arguments: item.id,
+                      arguments: ExampleDetailArgs(itemId: item.id),
                     );
                   },
                 ),

@@ -374,6 +374,12 @@ abstract class AppLocalizations {
   /// **'The requested resource was not found.'**
   String get errorNotFound;
 
+  /// No description provided for @errorConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'A conflict occurred with the current state of the resource. Please refresh and try again.'**
+  String get errorConflict;
+
   /// No description provided for @errorValidation.
   ///
   /// In en, this message translates to:
@@ -385,6 +391,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A server error occurred. Please try again later.'**
   String get errorServer;
+
+  /// No description provided for @errorDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is already in progress. Please wait.'**
+  String get errorDuplicate;
 
   /// No description provided for @errorCancelled.
   ///

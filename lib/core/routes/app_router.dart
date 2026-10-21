@@ -2,16 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_starter/core/routes/route_names.dart';
 import 'package:flutter_starter/core/routes/route_providers.dart';
 
-typedef AuthRedirectPredicate = String? Function(String? routeName);
+/// Pluggable redirect interface for navigation guards.
+abstract interface class IAuthRedirect {
+  /// Returns a redirect route (e.g. `RouteNames.onboarding` or `/login`),
+  /// or `null` if navigation to [routeName] should proceed normally.
+  String? redirect(String? routeName);
+}
+
+/// Default no-op implementation of [IAuthRedirect] allowing all navigation.
+class DefaultAuthRedirect implements IAuthRedirect {
+  const DefaultAuthRedirect();
+
+  @override
+  String? redirect(String? routeName) => null;
+}
 
 class AppRouter {
   AppRouter._();
 
-  /// Optional hook to intercept and redirect routes based on authentication/onboarding state.
-  static AuthRedirectPredicate? authRedirect;
+  /// Pluggable hook to intercept and redirect routes based on authentication/onboarding state.
+  static IAuthRedirect authRedirect = const DefaultAuthRedirect();
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    final destination = authRedirect?.call(settings.name) ?? settings.name;
+    final destination = authRedirect.redirect(settings.name) ?? settings.name;
 
     switch (destination) {
       case RouteNames.splash:
@@ -26,15 +39,8 @@ class AppRouter {
         return _fadeRoute(buildExampleRoute(), settings);
 
       case RouteNames.exampleDetail:
-        final args = settings.arguments;
-        final int itemId = switch (args) {
-          final int id => id,
-          final String str => int.tryParse(str) ?? 0,
-          final Map<String, dynamic> map => (map['id'] as int?) ?? 0,
-          _ => 0,
-        };
         return MaterialPageRoute(
-          builder: (_) => buildExampleDetailRoute(itemId),
+          builder: (_) => buildExampleDetailRoute(settings.arguments),
           settings: settings,
         );
 

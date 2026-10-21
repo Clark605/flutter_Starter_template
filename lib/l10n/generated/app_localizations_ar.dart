@@ -153,10 +153,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorNotFound => 'لم يتم العثور على العنصر المطلوب.';
 
   @override
+  String get errorConflict =>
+      'حدث تعارض مع الحالة الحالية للمورد. يرجى التحديث والمحاولة مرة أخرى.';
+
+  @override
   String get errorValidation => 'البيانات المدخلة غير صالحة.';
 
   @override
   String get errorServer => 'حدث خطأ في الخادم. يرجى المحاولة في وقت لاحق.';
+
+  @override
+  String get errorDuplicate => 'هذا الإجراء قيد التنفيذ بالفعل. يرجى الانتظار.';
 
   @override
   String get errorCancelled => 'تم إلغاء العملية.';

@@ -1,10 +1,29 @@
 import 'dart:async' as async;
-import 'package:dio/dio.dart';
 import 'package:flutter_starter/core/errors/app_exception.dart';
 import 'package:flutter_starter/core/errors/failure.dart';
+import 'package:flutter_starter/core/network/is_socket_error.dart';
+
+typedef CustomErrorMapper =
+    Failure? Function(Object error, [StackTrace? stackTrace]);
 
 class ErrorMapper {
   ErrorMapper._();
+
+  static final List<CustomErrorMapper> _customMappers = [];
+
+  /// Registers a custom failure mapper for specific transport or third-party exceptions.
+  ///
+  /// Mappers are evaluated in order before fallback unknown mapping.
+  static void register(CustomErrorMapper mapper) {
+    if (!_customMappers.contains(mapper)) {
+      _customMappers.add(mapper);
+    }
+  }
+
+  /// Clears all registered custom error mappers (useful for testing or reconfiguration).
+  static void clearMappers() {
+    _customMappers.clear();
+  }
 
   static Failure map(Object error, [StackTrace? stackTrace]) {
     if (error is Failure) {
@@ -68,8 +87,12 @@ class ErrorMapper {
       };
     }
 
-    if (error is DioException) {
-      return _mapDioException(error, stackTrace);
+    // Evaluate registered pluggable mappers (e.g. Dio, Firebase, Supabase, GraphQL)
+    for (final mapper in _customMappers) {
+      final mapped = mapper(error, stackTrace);
+      if (mapped != null) {
+        return mapped;
+      }
     }
 
     if (error is async.TimeoutException) {
@@ -84,87 +107,10 @@ class ErrorMapper {
       );
     }
 
-    // Check if error is socket/network related without importing dart:io directly
-    final errStr = error.toString().toLowerCase();
-    if (errStr.contains('socketexception') ||
-        errStr.contains('connection refused') ||
-        errStr.contains('network is unreachable')) {
+    if (isSocketError(error)) {
       return Failure.network(originalError: error, stackTrace: stackTrace);
     }
 
     return Failure.unknown(originalError: error, stackTrace: stackTrace);
-  }
-
-  static Failure _mapDioException(DioException dioErr, StackTrace? stackTrace) {
-    switch (dioErr.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        return Failure.timeout(originalError: dioErr, stackTrace: stackTrace);
-
-      case DioExceptionType.connectionError:
-        return Failure.network(originalError: dioErr, stackTrace: stackTrace);
-
-      case DioExceptionType.cancel:
-        return Failure.cancelled(originalError: dioErr, stackTrace: stackTrace);
-
-      case DioExceptionType.badResponse:
-        final status = dioErr.response?.statusCode;
-        final data = dioErr.response?.data;
-
-        final Map<String, List<String>> fieldErrors = {};
-        if (data is Map<String, dynamic>) {
-          final errorsObj = data['errors'] ?? data['Errors'];
-          if (errorsObj is Map<String, dynamic>) {
-            for (final entry in errorsObj.entries) {
-              if (entry.value is List) {
-                fieldErrors[entry.key] = (entry.value as List)
-                    .map((e) => e.toString())
-                    .toList();
-              }
-            }
-          }
-        }
-
-        return switch (status) {
-          400 => Failure.validation(
-            fieldErrors: fieldErrors,
-            originalError: dioErr,
-            stackTrace: stackTrace,
-          ),
-          401 => Failure.unauthorized(
-            originalError: dioErr,
-            stackTrace: stackTrace,
-          ),
-          403 => Failure.forbidden(
-            originalError: dioErr,
-            stackTrace: stackTrace,
-          ),
-          404 => Failure.notFound(
-            originalError: dioErr,
-            stackTrace: stackTrace,
-          ),
-          _ => Failure.server(
-            statusCode: status,
-            originalError: dioErr,
-            stackTrace: stackTrace,
-          ),
-        };
-
-      case DioExceptionType.badCertificate:
-      case DioExceptionType.unknown:
-      default:
-        final inner = dioErr.error;
-        if (inner != null) {
-          final innerStr = inner.toString().toLowerCase();
-          if (innerStr.contains('socketexception')) {
-            return Failure.network(
-              originalError: dioErr,
-              stackTrace: stackTrace,
-            );
-          }
-        }
-        return Failure.unknown(originalError: dioErr, stackTrace: stackTrace);
-    }
   }
 }

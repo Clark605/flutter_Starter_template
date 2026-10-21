@@ -13,7 +13,7 @@ Runs out of the box with **zero external accounts or configuration** (no Firebas
 
 ## 🏛️ Architecture Overview
 
-The architecture enforces a strict **Feature-First Clean Architecture** without an artificial domain layer. Presentation logic depends on repository interfaces returning a sealed `Result<T>`.
+The architecture enforces a strict **Feature-First Architecture with Repository Boundary** without an artificial domain layer. Presentation logic depends on repository interfaces returning a sealed `Result<T>`.
 
 ```mermaid
 flowchart TD
@@ -29,7 +29,7 @@ flowchart TD
         Cubit --> UnionState
     end
 
-    subgraph Domain ["Repository Boundary"]
+    subgraph Domain ["Repository boundary (interface in data/)"]
         RepoInterface["IFeatureRepository\n(Returns Result<T>)"]
     end
 
@@ -52,14 +52,15 @@ flowchart TD
 ## ✨ Features & Capabilities
 
 - **State Management**: `flutter_bloc` with both **Cubit** and **Bloc** demonstrated and supported.
-- **Guarded Actions (`ActionGuard`)**: Closed-state safety, re-entrant double-submit prevention (`key`), automatic retry with exponential backoff, and centralized error mapping.
-- **Errors & Results**: Sealed `Result<T>` (`Success`, `Error`) and typed `Failure` hierarchy (`network`, `timeout`, `unauthorized`, `forbidden`, `notFound`, `validation`, `server`, `cancelled`, `unknown`) carrying stable error codes and translation keys.
+- **Guarded Actions (`ActionGuard`)**: Closed-state safety, cooperative cancellation via `ActionToken`, re-entrant double-submit prevention (`Failure.duplicate`), automatic retry with exponential backoff, and pluggable error mapping. Decoupled from direct service locator access.
+- **Errors & Results**: Sealed `Result<T>` (`Success`, `Error`) and typed `Failure` hierarchy (`network`, `timeout`, `unauthorized`, `forbidden`, `notFound`, `conflict`, `validation`, `server`, `duplicate`, `cancelled`, `unknown`) carrying stable error codes and translation keys. Pluggable `ErrorMapper` registry.
+- **Navigation & Guarding**: Central routing via `AppRouter` with typed route arguments (`ExampleDetailArgs`), invalid route fallback to 404 (`buildNotFoundRoute`), and pluggable `IAuthRedirect` for protected routes (`RouteNames.protectedRoutes`).
 - **Material 3 Theming**: Design tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `Breakpoints`), dark/light themes, and locale-aware typography (Inter for English, IBM Plex Sans Arabic for Arabic).
 - **Full Localization (en + ar)**: ARB-driven localizations with RTL layout safety.
-- **Networking**: Dio module with timeouts, JSON headers, `AuthInterceptor` slot driven by `TokenProvider`, exponential retry interceptor, and debug-only sanitized logging.
+- **Networking**: Dio module with timeouts, JSON headers, `AuthInterceptor` slot driven by `TokenProvider`, exponential retry interceptor, web-safe socket checks, and debug-only sanitized logging.
 - **Connectivity & Offline**: `ConnectivityService`, `ConnectivityCubit`, animated offline banner, and no-internet screen.
 - **Observability Contracts**: `ICrashReporter`, `IAnalyticsService`, and `IRemoteConfigService` with zero-config no-op defaults, plus `ForceUpdateGate`.
-- **Reference Feature (`features/example`)**: Full reference implementation demonstrating the data $\to$ repository $\to$ Cubit/Bloc $\to$ UI pattern with pagination and skeletonizer.
+- **Reference Feature (`features/example`)**: Full reference implementation demonstrating the data -> repository -> Cubit/Bloc -> UI pattern with pagination and skeletonizer.
 - **Automated Tooling**: Architecture linter (`tool/check_architecture.dart`), automated rename tool (`tool/rename.dart`), GitHub Actions CI/CD workflows, and lefthook pre-commit hooks.
 
 ---
@@ -68,7 +69,7 @@ flowchart TD
 
 ### 1. Clone or Use This Template
 ```bash
-git clone https://github.com/your-username/flutter_starter.git my_app
+git clone https://github.com/Clark605/flutter_Starter_template.git my_app
 cd my_app
 ```
 
@@ -94,6 +95,15 @@ dart run build_runner build --delete-conflicting-outputs
 ```bash
 flutter run --flavor dev --dart-define-from-file=env/dev.json
 ```
+
+---
+
+## ⚠️ Known Limitations
+
+- **Web Target**: Web is supported with web-safe conditional imports (no raw `dart:io` in shared logic), but full responsive web testing and production web bundling are optional. See [Web Support Guide](docs/architecture.md#web-support).
+- **iOS Flavors**: Flavored iOS schemes and build configurations require macOS with Xcode installed. On Linux or Windows CI hosts, iOS builds cannot be compiled.
+- **Release Signing**: Android release builds require configuring `android/key.properties` (see `android/key.properties.example`). Without valid release keys, local release builds fallback to debug signing and produce a warning, while CI release builds fail fast.
+- **Minimum Android SDK**: Android `minSdk` is 24 to support secure cryptographic storage in `flutter_secure_storage` v11.
 
 ---
 
@@ -137,13 +147,13 @@ lib/
 │   ├── cubit/                     # ActionGuard mixin, BaseCubit, AppSettingsCubit
 │   ├── di/                        # GetIt and Injectable container
 │   ├── errors/                    # AppException, Failure, Result<T>, ErrorMapper
-│   ├── network/                   # DioClient, AuthInterceptor, RetryInterceptor
+│   ├── network/                   # DioClient, AuthInterceptor, RetryInterceptor, dio_error_mapper
 │   ├── observability/             # CrashReporter, Analytics, RemoteConfig, ForceUpdateGate
 │   ├── routes/                    # AppRouter, AppNavigator, RouteNames, RouteProviders
 │   ├── services/                  # ConnectivityService
 │   ├── storage/                   # PrefsService, SecureStorageService
 │   ├── theme/                     # AppSpacing, AppRadius, AppColors, AppTypography
-│   ├── utils/                     # AppLogger, ResponsiveLayout, PaginationState, Validators
+│   ├── utils/                     # AppLogger, ActionToken, ResponsiveLayout, PaginationState, Validators
 │   └── widgets/                   # AppButton, AppTextField, AppAvatar, StatusBadge, etc.
 └── features/
     └── example/                   # Complete reference feature implementation
@@ -153,7 +163,7 @@ lib/
         │   └── repositories/      # IItemRepository & ItemRepositoryImpl
         ├── cubit/                 # ExampleCubit & ExampleState
         ├── bloc/                  # ExampleDetailBloc, Event & State
-        └── ui/                    # ExampleScreen, ExampleDetailScreen & ItemCard
+        └── ui/                    # ExampleScreen, ExampleDetailScreen, ExampleDetailArgs & ItemCard
 ```
 
 ---
@@ -171,8 +181,11 @@ lib/
 - [Architecture Guide](docs/architecture.md)
 - [Design Tokens & Theming](docs/theming.md)
 - [Flavors & Environments](docs/flavors.md)
+- [Release Guide](docs/releasing.md)
 - [Backend Variants (REST / Firebase / Supabase / GraphQL)](docs/backend-variants.md)
 - [Optional Modules Catalog](docs/optional-modules.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
 - [AI Agent Guidelines](AGENTS.md)
 
 ---
