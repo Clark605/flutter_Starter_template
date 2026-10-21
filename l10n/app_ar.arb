@@ -40,6 +40,8 @@
   "updateRequiredTitle": "تحديث إلزامي",
   "updateRequiredMessage": "يتوفر إصدار جديد من التطبيق. يرجى التحديث للمتابعة.",
   "updateNow": "تحديث الآن",
+  "copyUpdateLink": "نسخ رابط التحديث",
+  "linkCopied": "تم نسخ الرابط إلى الحافظة.",
   "maintenanceTitle": "تحت الصيانة",
   "maintenanceMessage": "النظام يخضع للصيانة الدورية حالياً. يرجى المحاولة لاحقاً.",
 

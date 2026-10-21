@@ -78,13 +78,19 @@ Run the idempotent rename script to set your app identifier, package name, and d
 dart run tool/rename.dart --name my_app --org com.mycompany --display "My App"
 ```
 
-### 3. Fetch Dependencies & Run Code Generation
+### 3. Set Up Environment Configuration
+Generate local environment files (`env/*.json`) from the committed non-secret templates:
+```bash
+dart run tool/setup_env.dart
+```
+
+### 4. Fetch Dependencies & Run Code Generation
 ```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-### 4. Run the Dev Flavor
+### 5. Run the Dev Flavor
 ```bash
 flutter run --flavor dev --dart-define-from-file=env/dev.json
 ```

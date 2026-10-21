@@ -94,6 +94,9 @@ Always inspect and mirror `lib/features/example/`:
 
 ## 9. Essential Commands
 ```bash
+# Setup local environment files from templates
+dart run tool/setup_env.dart
+
 # Code generation
 dart run build_runner build --delete-conflicting-outputs
 

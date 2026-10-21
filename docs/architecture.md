@@ -135,3 +135,20 @@ Failures include:
 - `ServerFailure` (`SERVER_ERROR`, includes HTTP status code)
 - `CancelledFailure` (`CANCELLED`)
 - `UnknownFailure` (`UNKNOWN_ERROR`)
+
+---
+
+## 4. Startup Bootstrap Sequence
+
+The application boot flow in [`lib/bootstrap.dart`](file:///d:/MyProgrammingProjects/FlutterProjects/my_flutter_template/lib/bootstrap.dart) is engineered for resilience, ensuring the splash screen is never hung:
+
+1. **Native Splash Preservation**: Calls `FlutterNativeSplash.preserve()` immediately after `WidgetsFlutterBinding.ensureInitialized()` to prevent white/black flash before initial frame.
+2. **Early Error Buffering**: Installs `FlutterError.onError` and `PlatformDispatcher.instance.onError` before DI. Logs all errors immediately and buffers them in memory.
+3. **Dependency Injection**: Invokes `configureDependencies()` to register core services, Dio networking, storage, and repositories.
+4. **Crash Reporter Online & Buffer Flush**: Initializes `ICrashReporter` (No-Op default, Firebase Crashlytics or Sentry via optional modules) and flushes any pre-initialization errors.
+5. **Remote Config with Timeout**: Calls `remoteConfig.init()` and `fetchAndActivate()` bounded by `AppConfig.remoteConfigTimeout` (default: 3 seconds). If network stalls or times out, it gracefully falls back to compile-time defaults.
+6. **Force-Update & Maintenance Gate**: Evaluates `ForceUpdateGate` against min version and maintenance flags:
+   - `GateStatus.maintenance` $\to$ Routes to [`MaintenanceScreen`](file:///d:/MyProgrammingProjects/FlutterProjects/my_flutter_template/lib/core/widgets/screens/maintenance_screen.dart) (`/maintenance`) with back-navigation blocked.
+   - `GateStatus.updateRequired` $\to$ Routes to [`UpdateRequiredScreen`](file:///d:/MyProgrammingProjects/FlutterProjects/my_flutter_template/lib/core/widgets/screens/update_required_screen.dart) (`/update-required`) with store launch link.
+   - `GateStatus.normal` $\to$ Routes to onboarding or home screen based on `PrefsService.hasSeenOnboarding`.
+7. **Guaranteed Splash Removal**: Handled in a `finally` block with `FlutterNativeSplash.remove()` so that even in case of an uncaught boot exception, the splash is cleared and the app transitions to `RouteNames.error`.

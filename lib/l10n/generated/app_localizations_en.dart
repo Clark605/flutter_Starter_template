@@ -123,6 +123,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateNow => 'Update Now';
 
   @override
+  String get copyUpdateLink => 'Copy Update Link';
+
+  @override
+  String get linkCopied => 'Link copied to clipboard.';
+
+  @override
   String get maintenanceTitle => 'Under Maintenance';
 
   @override

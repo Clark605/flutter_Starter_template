@@ -14,6 +14,19 @@
 
 > [!IMPORTANT]
 > Real environment files (`env/*.json`) are excluded in `.gitignore`. Example templates (`env/*.example.json`) are committed to version control.
+> 
+> To generate initial local environment files from the example templates:
+> ```bash
+> dart run tool/setup_env.dart
+> ```
+
+### CI/CD Secret Injection
+In automated CI/CD pipelines (e.g., GitHub Actions), secrets should never be checked into version control. Instead, store your configuration as GitHub Actions Secrets (e.g. `PROD_ENV_JSON`) and write them to `env/<flavor>.json` during the workflow prior to building:
+```yaml
+- name: Inject Production Environment Secrets
+  run: echo "${{ secrets.PROD_ENV_JSON }}" > env/prod.json
+```
+For default validation pipelines (CI), example files can be safely copied (`cp env/dev.example.json env/dev.json`).
 
 ### JSON Definition Example (`env/dev.json`):
 ```json
@@ -82,5 +95,17 @@ productFlavors {
 }
 ```
 
-### iOS Schemes
-Create Xcode Schemes corresponding to configurations (`Debug-dev`, `Release-prod`, etc.) matching the bundle identifiers.
+### iOS Schemes & Configurations
+The project contains pre-configured Xcode schemes and build configurations for each flavor:
+- Schemes (`ios/Runner.xcodeproj/xcshareddata/xcschemes/`): `dev`, `staging`, `prod`.
+- Build Configurations: `Debug-dev`, `Release-dev`, `Profile-dev`, `Debug-staging`, `Release-staging`, `Profile-staging`, `Debug-prod`, `Release-prod`, `Profile-prod`.
+- Configuration Files (`ios/Flutter/`): `dev.xcconfig`, `staging.xcconfig`, `prod.xcconfig` setting `PRODUCT_BUNDLE_IDENTIFIER` and `APP_DISPLAY_NAME`.
+- Target Display Name: `Info.plist` references `$(APP_DISPLAY_NAME)` dynamically.
+
+> [!NOTE]
+> **Status:** iOS flavors are configured and committed, but marked **unverified on device** because the development workspace is running on Windows (no macOS/Xcode toolchain available).
+>
+> On a macOS machine, verify the iOS build with:
+> ```bash
+> flutter build ios --flavor dev --no-codesign -t lib/main.dart --dart-define-from-file=env/dev.json
+> ```

@@ -37,6 +37,9 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
+      - name: Setup environment configuration
+        run: cp env/prod.example.json env/prod.json
+
       - name: Build Android App Bundle (Obfuscated)
         run: |
           mkdir -p build/symbols/android
@@ -51,6 +54,7 @@ jobs:
         run: |
           mkdir -p build/symbols/ios
           flutter build ios \
+            --flavor prod \
             --no-codesign \
             -t lib/main.dart \
             --dart-define-from-file=env/prod.json \

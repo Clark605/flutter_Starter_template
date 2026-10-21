@@ -320,6 +320,18 @@ abstract class AppLocalizations {
   /// **'Update Now'**
   String get updateNow;
 
+  /// No description provided for @copyUpdateLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Update Link'**
+  String get copyUpdateLink;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard.'**
+  String get linkCopied;
+
   /// No description provided for @maintenanceTitle.
   ///
   /// In en, this message translates to:

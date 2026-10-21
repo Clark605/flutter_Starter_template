@@ -9,5 +9,8 @@ class RouteNames {
   static const String example = '/example';
   static const String exampleDetail = '/example-detail';
   static const String noInternet = '/no-internet';
+  static const String error = '/error';
+  static const String maintenance = '/maintenance';
+  static const String updateRequired = '/update-required';
   static const String notFound = '/404';
 }

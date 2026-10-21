@@ -56,6 +56,10 @@ class AppConfig {
     'FORCE_UPDATE_URL',
     defaultValue: '',
   );
+  static const int remoteConfigTimeoutSeconds = int.fromEnvironment(
+    'REMOTE_CONFIG_TIMEOUT_SECONDS',
+    defaultValue: 3,
+  );
 
   static final AppFlavor flavor = AppFlavor.fromString(_flavorStr);
 
@@ -67,4 +71,6 @@ class AppConfig {
       const Duration(seconds: connectTimeoutSeconds);
   static Duration get receiveTimeout =>
       const Duration(seconds: receiveTimeoutSeconds);
+  static Duration get remoteConfigTimeout =>
+      const Duration(seconds: remoteConfigTimeoutSeconds);
 }

@@ -123,6 +123,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updateNow => 'تحديث الآن';
 
   @override
+  String get copyUpdateLink => 'نسخ رابط التحديث';
+
+  @override
+  String get linkCopied => 'تم نسخ الرابط إلى الحافظة.';
+
+  @override
   String get maintenanceTitle => 'تحت الصيانة';
 
   @override

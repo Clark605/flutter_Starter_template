@@ -17,8 +17,13 @@ import 'package:flutter_starter/l10n/generated/app_localizations.dart';
 
 class StarterApp extends StatefulWidget {
   final String initialRoute;
+  final Object? initialRouteArgs;
 
-  const StarterApp({super.key, required this.initialRoute});
+  const StarterApp({
+    super.key,
+    required this.initialRoute,
+    this.initialRouteArgs,
+  });
 
   @override
   State<StarterApp> createState() => _StarterAppState();
@@ -71,6 +76,17 @@ class _StarterAppState extends State<StarterApp> {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             initialRoute: widget.initialRoute,
+            onGenerateInitialRoutes: (initialRouteName) {
+              return [
+                AppRouter.onGenerateRoute(
+                      RouteSettings(
+                        name: initialRouteName,
+                        arguments: widget.initialRouteArgs,
+                      ),
+                    ) ??
+                    MaterialPageRoute(builder: (_) => const SizedBox.shrink()),
+              ];
+            },
             onGenerateRoute: AppRouter.onGenerateRoute,
             builder: (context, child) {
               return OfflineBanner(child: child ?? const SizedBox.shrink());

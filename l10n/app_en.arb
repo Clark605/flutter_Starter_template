@@ -43,6 +43,8 @@
   "updateRequiredTitle": "Update Required",
   "updateRequiredMessage": "A new version of the application is available. Please update to continue.",
   "updateNow": "Update Now",
+  "copyUpdateLink": "Copy Update Link",
+  "linkCopied": "Link copied to clipboard.",
   "maintenanceTitle": "Under Maintenance",
   "maintenanceMessage": "The system is temporarily under maintenance. Please check back shortly.",
 

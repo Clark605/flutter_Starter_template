@@ -50,6 +50,26 @@ class AppRouter {
           settings: settings,
         );
 
+      case RouteNames.maintenance:
+        return MaterialPageRoute(
+          builder: (_) => buildMaintenanceRoute(),
+          settings: settings,
+        );
+
+      case RouteNames.updateRequired:
+        final updateUrl = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => buildUpdateRequiredRoute(updateUrl),
+          settings: settings,
+        );
+
+      case RouteNames.error:
+        final message = settings.arguments as String?;
+        return MaterialPageRoute(
+          builder: (_) => buildErrorRoute(message: message),
+          settings: settings,
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => buildNotFoundRoute(settings.name),

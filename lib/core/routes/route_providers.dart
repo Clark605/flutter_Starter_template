@@ -3,11 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_starter/core/di/injection.dart';
 import 'package:flutter_starter/core/errors/failure.dart';
 import 'package:flutter_starter/core/widgets/screens/error_screen.dart';
+import 'package:flutter_starter/core/widgets/screens/maintenance_screen.dart';
 import 'package:flutter_starter/core/widgets/screens/no_internet_screen.dart';
 import 'package:flutter_starter/core/widgets/screens/not_found_screen.dart';
 import 'package:flutter_starter/core/widgets/screens/onboarding_screen.dart';
 import 'package:flutter_starter/core/widgets/screens/settings_screen.dart';
 import 'package:flutter_starter/core/widgets/screens/splash_screen.dart';
+import 'package:flutter_starter/core/widgets/screens/update_required_screen.dart';
 import 'package:flutter_starter/features/example/bloc/example_detail_bloc.dart';
 import 'package:flutter_starter/features/example/bloc/example_detail_event.dart';
 import 'package:flutter_starter/features/example/cubit/example_cubit.dart';
@@ -25,6 +27,12 @@ Widget buildNotFoundRoute(String? routeName) =>
 
 Widget buildNoInternetRoute([VoidCallback? onRetry]) =>
     NoInternetScreen(onRetry: onRetry);
+
+Widget buildMaintenanceRoute([VoidCallback? onRetry]) =>
+    MaintenanceScreen(onRetry: onRetry);
+
+Widget buildUpdateRequiredRoute([String updateUrl = '']) =>
+    UpdateRequiredScreen(updateUrl: updateUrl);
 
 Widget buildErrorRoute({
   Failure? failure,

@@ -101,25 +101,63 @@ void main(List<String> args) {
     gradleFile.writeAsStringSync(content);
   }
 
-  // 4. Update iOS project.pbxproj
+  // 4. Update iOS project.pbxproj & xcconfig files
   final pbxFile = File('ios/Runner.xcodeproj/project.pbxproj');
   if (pbxFile.existsSync()) {
     final camelName = _toCamelCase(newName);
     _replaceInFile(
       pbxFile,
-      RegExp(r'PRODUCT_BUNDLE_IDENTIFIER\s*=\s*[^;]+;'),
-      'PRODUCT_BUNDLE_IDENTIFIER = $org.$camelName;',
+      RegExp(r'com\.starter\.flutterStarter'),
+      '$org.$camelName',
     );
+  }
+
+  // Update iOS per-flavor xcconfig files
+  final iosFlutterDir = Directory('ios/Flutter');
+  if (iosFlutterDir.existsSync()) {
+    final camelName = _toCamelCase(newName);
+    for (final xcconfigFile in iosFlutterDir.listSync().whereType<File>()) {
+      if (xcconfigFile.path.endsWith('.xcconfig')) {
+        var content = xcconfigFile.readAsStringSync();
+        // Update bundle identifier
+        content = content.replaceAllMapped(
+          RegExp(r'PRODUCT_BUNDLE_IDENTIFIER\s*=\s*[^\s]+'),
+          (match) {
+            final fileName = xcconfigFile.uri.pathSegments.last;
+            if (fileName == 'dev.xcconfig') {
+              return 'PRODUCT_BUNDLE_IDENTIFIER = $org.$camelName.dev';
+            } else if (fileName == 'staging.xcconfig') {
+              return 'PRODUCT_BUNDLE_IDENTIFIER = $org.$camelName.staging';
+            } else if (fileName == 'prod.xcconfig') {
+              return 'PRODUCT_BUNDLE_IDENTIFIER = $org.$camelName';
+            }
+            return match.group(0)!;
+          },
+        );
+        // Update display name
+        content = content.replaceAllMapped(
+          RegExp(r'APP_DISPLAY_NAME\s*=\s*.+'),
+          (match) {
+            final fileName = xcconfigFile.uri.pathSegments.last;
+            if (fileName == 'dev.xcconfig') {
+              return 'APP_DISPLAY_NAME = $display (Dev)';
+            } else if (fileName == 'staging.xcconfig') {
+              return 'APP_DISPLAY_NAME = $display (Staging)';
+            } else if (fileName == 'prod.xcconfig') {
+              return 'APP_DISPLAY_NAME = $display';
+            }
+            return match.group(0)!;
+          },
+        );
+        xcconfigFile.writeAsStringSync(content);
+      }
+    }
   }
 
   // 5. Update iOS Info.plist
   final plistFile = File('ios/Runner/Info.plist');
   if (plistFile.existsSync()) {
     var content = plistFile.readAsStringSync();
-    content = content.replaceAll(
-      RegExp(r'<key>CFBundleDisplayName</key>\s*<string>[^<]+</string>'),
-      '<key>CFBundleDisplayName</key>\n\t<string>$display</string>',
-    );
     content = content.replaceAll(
       RegExp(r'<key>CFBundleName</key>\s*<string>[^<]+</string>'),
       '<key>CFBundleName</key>\n\t<string>$newName</string>',
@@ -133,9 +171,14 @@ void main(List<String> args) {
     for (final file in envDir.listSync().whereType<File>()) {
       if (file.path.endsWith('.json')) {
         var content = file.readAsStringSync();
+        final flavorMatch = RegExp(
+          r'"FLAVOR":\s*"([^"]+)"',
+        ).firstMatch(content);
+        final flavor = flavorMatch?.group(1);
+        final suffix = (flavor != null && flavor != 'prod') ? '.$flavor' : '';
         content = content.replaceAll(
           RegExp(r'"APPLICATION_ID":\s*"[^"]+"'),
-          '"APPLICATION_ID": "$org.$newName"',
+          '"APPLICATION_ID": "$org.$newName$suffix"',
         );
         file.writeAsStringSync(content);
       }
