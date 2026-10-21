@@ -107,6 +107,11 @@ flutter analyze
 # Architecture validation
 dart run tool/check_architecture.dart
 
+# Launcher icons per flavor
+dart run flutter_launcher_icons -f flutter_launcher_icons-dev.yaml
+dart run flutter_launcher_icons -f flutter_launcher_icons-staging.yaml
+dart run flutter_launcher_icons -f flutter_launcher_icons-prod.yaml
+
 # Run per flavor
 flutter run --flavor dev --dart-define-from-file=env/dev.json
 flutter run --flavor staging --dart-define-from-file=env/staging.json

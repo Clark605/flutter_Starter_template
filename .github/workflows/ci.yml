@@ -7,6 +7,10 @@ on:
     branches: [main, master, develop]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: Lint, Analyze & Architecture Check
@@ -16,6 +20,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -29,6 +40,11 @@ jobs:
 
       - name: Verify code formatting
         run: dart format --set-exit-if-changed .
+
+      - name: Verify generated code is up to date
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          git diff --exit-code || (echo "::error::Generated files (*.g.dart, *.freezed.dart, *.config.dart) are out of date. Run 'dart run build_runner build --delete-conflicting-outputs' locally and commit the changes." && exit 1)
 
       - name: Verify architecture boundaries
         run: dart run tool/check_architecture.dart

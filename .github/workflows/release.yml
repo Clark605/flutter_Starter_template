@@ -11,11 +11,15 @@ on:
         required: true
         default: 'v1.0.0'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-release:
-    name: Build Obfuscated Release Artifacts
-    runs-on: macos-latest
-    timeout-minutes: 30
+  validate:
+    name: Validate Code & Architecture
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -37,8 +41,64 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
+  build-android:
+    name: Build Android Release (AAB)
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.1'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
       - name: Setup environment configuration
         run: cp env/prod.example.json env/prod.json
+
+      - name: Verify Keystore Secrets
+        run: |
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing. Configure it in GitHub repository secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" ]; then
+            echo "::error::ANDROID_KEYSTORE_PASSWORD secret is missing."
+            exit 1
+          fi
+          if [ -z "${{ secrets.ANDROID_KEY_ALIAS }}" ]; then
+            echo "::error::ANDROID_KEY_ALIAS secret is missing."
+            exit 1
+          fi
+          if [ -z "${{ secrets.ANDROID_KEY_PASSWORD }}" ]; then
+            echo "::error::ANDROID_KEY_PASSWORD secret is missing."
+            exit 1
+          fi
+
+      - name: Setup Keystore & Signing Config
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+          cat <<EOF > android/key.properties
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=upload-keystore.jks
+          EOF
 
       - name: Build Android App Bundle (Obfuscated)
         run: |
@@ -49,6 +109,43 @@ jobs:
             --dart-define-from-file=env/prod.json \
             --obfuscate \
             --split-debug-info=build/symbols/android
+
+      - name: Upload Android AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: build/app/outputs/bundle/prodRelease/*.aab
+          retention-days: 14
+
+      - name: Upload Android Debug Symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-symbols
+          path: build/symbols/android/
+          retention-days: 14
+
+  build-ios:
+    name: Build iOS Release (No Codesign)
+    needs: validate
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.1'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Setup environment configuration
+        run: cp env/prod.example.json env/prod.json
 
       - name: Build iOS Application (No Codesign, Obfuscated)
         run: |
@@ -61,16 +158,9 @@ jobs:
             --obfuscate \
             --split-debug-info=build/symbols/ios
 
-      - name: Upload Android AAB
+      - name: Upload iOS Debug Symbols
         uses: actions/upload-artifact@v4
         with:
-          name: release-aab
-          path: build/app/outputs/bundle/prodRelease/*.aab
-          retention-days: 14
-
-      - name: Upload Debug Symbols
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-symbols
-          path: build/symbols/
+          name: ios-debug-symbols
+          path: build/symbols/ios/
           retention-days: 14

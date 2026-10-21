@@ -152,3 +152,18 @@ The application boot flow in [`lib/bootstrap.dart`](file:///d:/MyProgrammingProj
    - `GateStatus.updateRequired` $\to$ Routes to [`UpdateRequiredScreen`](file:///d:/MyProgrammingProjects/FlutterProjects/my_flutter_template/lib/core/widgets/screens/update_required_screen.dart) (`/update-required`) with store launch link.
    - `GateStatus.normal` $\to$ Routes to onboarding or home screen based on `PrefsService.hasSeenOnboarding`.
 7. **Guaranteed Splash Removal**: Handled in a `finally` block with `FlutterNativeSplash.remove()` so that even in case of an uncaught boot exception, the splash is cleared and the app transitions to `RouteNames.error`.
+
+---
+
+## 5. Security & Storage (flutter_secure_storage Migration Guide)
+
+[`SecureStorageService`](file:///d:/MyProgrammingProjects/FlutterProjects/my_flutter_template/lib/core/storage/secure_storage_service.dart) leverages `flutter_secure_storage: ^11.2.0` with hardware-backed encryption:
+- **Android**: Custom `AES_GCM_NoPadding` and `RSA_ECB_OAEPwithSHA_256andMGF1Padding` backed by Android KeyStore (`minSdk 24`). Legacy Jetpack `EncryptedSharedPreferences` is deprecated and removed.
+- **iOS**: Keychain with `KeychainAccessibility.first_unlock`.
+
+> [!CAUTION]
+> ### Upgrading from Legacy Versions (v8 or v9)
+> If migrating an existing production application with active users from `flutter_secure_storage` v8/v9 to v11:
+> 1. **Do not jump directly from v8/v9 to v11.** Version 11 completely eliminates legacy decryption ciphers. Because `resetOnError` defaults to `true`, a direct jump fails to decrypt old keys and will wipe stored user tokens.
+> 2. **Step 1:** Upgrade the project to `flutter_secure_storage: ^10.2.0` with `minSdk 23` and ship a release to users. Version 10 includes the automatic migration bridge that reads old data and re-encrypts it using the new AES-GCM cipher.
+> 3. **Step 2:** After your userbase has run the v10 build, upgrade to `flutter_secure_storage: ^11.x` (`minSdk 24`).

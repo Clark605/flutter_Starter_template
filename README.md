@@ -3,7 +3,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.41.1-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.11.0-0175C2?logo=dart)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Analysis](https://img.shields.io/badge/Analysis-0%20issues-success.svg)](https://github.com)
+[![CI](https://github.com/Clark605/flutter_Starter_template/actions/workflows/ci.yml/badge.svg)](https://github.com/Clark605/flutter_Starter_template/actions/workflows/ci.yml)
 
 A production-grade, reusable, backend-agnostic Flutter starter template. Built with **Bloc & Cubit**, **Freezed 3**, **Injectable DI**, **Dio** with resilient guarded actions, **Material 3** theming with full English and Arabic (RTL) support, and native multi-flavor environments.
 

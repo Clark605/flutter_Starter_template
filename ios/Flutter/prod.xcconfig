@@ -3,3 +3,4 @@
 
 PRODUCT_BUNDLE_IDENTIFIER = com.starter.flutterStarter
 APP_DISPLAY_NAME = Starter
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-prod

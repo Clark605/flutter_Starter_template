@@ -3,3 +3,4 @@
 
 PRODUCT_BUNDLE_IDENTIFIER = com.starter.flutterStarter.staging
 APP_DISPLAY_NAME = Starter (Staging)
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-staging

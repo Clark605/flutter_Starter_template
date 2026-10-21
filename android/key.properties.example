@@ -1,0 +1,8 @@
+# Keystore configuration for release builds
+# Copy this file to android/key.properties and replace placeholders with your actual keystore details.
+# DO NOT commit android/key.properties or your *.jks file to version control.
+
+storePassword=placeholder_store_password
+keyPassword=placeholder_key_password
+keyAlias=placeholder_key_alias
+storeFile=upload-keystore.jks

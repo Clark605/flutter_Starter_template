@@ -109,3 +109,24 @@ The project contains pre-configured Xcode schemes and build configurations for e
 > ```bash
 > flutter build ios --flavor dev --no-codesign -t lib/main.dart --dart-define-from-file=env/dev.json
 > ```
+
+---
+
+## 4. Flavor-Specific App Icons
+
+Each flavor uses dedicated assets and configuration files in the root directory:
+- `dev`: `flutter_launcher_icons-dev.yaml` (`assets/images/app_logo_dev.png` with gold/amber ribbon)
+- `staging`: `flutter_launcher_icons-staging.yaml` (`assets/images/app_logo_staging.png` with cyan ribbon)
+- `prod`: `flutter_launcher_icons-prod.yaml` (`assets/images/app_logo.png` neutral base)
+
+To regenerate icons after updating logos:
+```bash
+dart run flutter_launcher_icons -f flutter_launcher_icons-dev.yaml
+dart run flutter_launcher_icons -f flutter_launcher_icons-staging.yaml
+dart run flutter_launcher_icons -f flutter_launcher_icons-prod.yaml
+```
+
+---
+
+## 5. Release Signing
+For production signing keys, keystore generation, and CI/CD secret configuration, see [`docs/releasing.md`](releasing.md).

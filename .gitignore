@@ -75,3 +75,9 @@ migrate_working_dir/
 # Environment secret files (only commit example templates)
 env/*.json
 !env/*.example.json
+
+# Android signing secrets
+android/key.properties
+!android/key.properties.example
+*.jks
+*.keystore
