@@ -25,8 +25,8 @@ flowchart TD
 
     subgraph State ["State Management"]
         Cubit["Cubit / Bloc\n(ActionGuard Mixin)"]
-        UnionState["FeatureState\n(Freezed Union)"]
-        Cubit --> UnionState
+        State["FeatureState\n(Freezed Class + LoadStatus)"]
+        Cubit --> State
     end
 
     subgraph Domain ["Repository boundary (interface in data/)"]

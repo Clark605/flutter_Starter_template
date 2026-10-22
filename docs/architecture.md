@@ -12,7 +12,7 @@ flowchart TD
 
     subgraph StateManagement ["State Management"]
         Cubit["FeatureCubit / Bloc\n(with ActionGuard)"]
-        State["FeatureState\n(Freezed Unions)"]
+        State["FeatureState\n(Freezed Class + LoadStatus)"]
         Cubit --> State
     end
 
@@ -65,10 +65,10 @@ In `flutter_starter`:
 class ExampleCubit extends BaseCubit<ExampleState> {
   final ItemRepository _repository;
 
-  ExampleCubit(this._repository) : super(const ExampleState.initial());
+  ExampleCubit(this._repository) : super(const ExampleState());
 
   Future<void> loadItems() async {
-    emit(const ExampleState.loading());
+    emit(state.copyWith(status: LoadStatus.loading, failure: null));
 
     final result = await guard<List<ItemModel>>(
       () => _repository.getItems(page: 1, limit: 10),
@@ -76,10 +76,18 @@ class ExampleCubit extends BaseCubit<ExampleState> {
     );
 
     result.fold(
-      (items) => emit(ExampleState.loaded(items: items, page: 1, hasMore: true)),
+      (items) => emit(
+        state.copyWith(
+          status: LoadStatus.success,
+          items: items,
+          page: 1,
+          hasMore: true,
+          failure: null,
+        ),
+      ),
       (failure) {
         if (failure is! CancelledFailure) {
-          emit(ExampleState.error(failure));
+          emit(state.copyWith(status: LoadStatus.failure, failure: failure));
         }
       },
     );
@@ -94,7 +102,7 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
     with ActionGuard<ExampleDetailState> {
   final ItemRepository _repository;
 
-  ExampleDetailBloc(this._repository) : super(const ExampleDetailState.initial()) {
+  ExampleDetailBloc(this._repository) : super(const ExampleDetailState()) {
     on<ExampleDetailEvent>((event, emit) async {
       await event.when(
         load: (id) => _onLoad(id, emit),
@@ -104,7 +112,7 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
   }
 
   Future<void> _onLoad(int id, Emitter<ExampleDetailState> emit) async {
-    emit(const ExampleDetailState.loading());
+    emit(state.copyWith(status: LoadStatus.loading, failure: null));
 
     final result = await guard<ItemModel>(
       () => _repository.getItem(id),
@@ -113,10 +121,16 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
     );
 
     result.fold(
-      (item) => emit(ExampleDetailState.loaded(item)),
+      (item) => emit(
+        state.copyWith(
+          status: LoadStatus.success,
+          item: item,
+          failure: null,
+        ),
+      ),
       (failure) {
         if (failure is! CancelledFailure) {
-          emit(ExampleDetailState.error(failure));
+          emit(state.copyWith(status: LoadStatus.failure, failure: failure));
         }
       },
     );
@@ -238,7 +252,7 @@ dart run tool/check_architecture.dart --list-rules
 ### The 8 Rules:
 1. **Rule 1: No domain layer**: Cubits/Blocs depend on repository interfaces (`data/repositories/<feature>_repository.dart`), never on data sources (`data/datasources/`) or concrete implementations (`*_impl.dart`).
 2. **Rule 2: Result types**: UI never sees transport types (Dio, Firebase, Supabase, GraphQL). Data sources and repositories throw; `guard()` returns `Result<T>`.
-3. **Rule 3: Freezed unions & ActionGuard**: State classes are Freezed unions; Cubits/Blocs use `ActionGuard` for all async operations.
+3. **Rule 3: State pattern & ActionGuard**: State is ONE Freezed class with a `LoadStatus status` field, feature data, and `Failure? failure`; Cubits/Blocs use `ActionGuard` for all async operations.
 4. **Rule 4: Registration**: Repository implementations use `@LazySingleton`; Cubits/Blocs use `@injectable`.
 5. **Rule 5: Zero cross-feature imports**: Features never import other features. `lib/core/` cannot import `lib/features/` (except the central `route_providers.dart` assembly root).
 6. **Rule 6: Thin screens**: Screens only read state from Cubit/Bloc and render. UI files cannot import `data/repositories/` or `core/di/injection.dart`.

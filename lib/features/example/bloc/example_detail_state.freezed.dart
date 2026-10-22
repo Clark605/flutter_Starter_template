@@ -14,30 +14,75 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ExampleDetailState {
 
-
+ LoadStatus get status; ItemModel? get item; Failure? get failure;
+/// Create a copy of ExampleDetailState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ExampleDetailStateCopyWith<ExampleDetailState> get copyWith => _$ExampleDetailStateCopyWithImpl<ExampleDetailState>(this as ExampleDetailState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleDetailState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleDetailState&&(identical(other.status, status) || other.status == status)&&(identical(other.item, item) || other.item == item)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,status,item,failure);
 
 @override
 String toString() {
-  return 'ExampleDetailState()';
+  return 'ExampleDetailState(status: $status, item: $item, failure: $failure)';
 }
 
 
 }
 
 /// @nodoc
-class $ExampleDetailStateCopyWith<$Res>  {
-$ExampleDetailStateCopyWith(ExampleDetailState _, $Res Function(ExampleDetailState) __);
+abstract mixin class $ExampleDetailStateCopyWith<$Res>  {
+  factory $ExampleDetailStateCopyWith(ExampleDetailState value, $Res Function(ExampleDetailState) _then) = _$ExampleDetailStateCopyWithImpl;
+@useResult
+$Res call({
+ LoadStatus status, ItemModel? item, Failure? failure
+});
+
+
+$ItemModelCopyWith<$Res>? get item;
+
+}
+/// @nodoc
+class _$ExampleDetailStateCopyWithImpl<$Res>
+    implements $ExampleDetailStateCopyWith<$Res> {
+  _$ExampleDetailStateCopyWithImpl(this._self, this._then);
+
+  final ExampleDetailState _self;
+  final $Res Function(ExampleDetailState) _then;
+
+/// Create a copy of ExampleDetailState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? item = freezed,Object? failure = freezed,}) {
+  return _then(_self.copyWith(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as LoadStatus,item: freezed == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
+as ItemModel?,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as Failure?,
+  ));
+}
+/// Create a copy of ExampleDetailState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ItemModelCopyWith<$Res>? get item {
+    if (_self.item == null) {
+    return null;
+  }
+
+  return $ItemModelCopyWith<$Res>(_self.item!, (value) {
+    return _then(_self.copyWith(item: value));
+  });
+}
 }
 
 
@@ -55,14 +100,11 @@ extension ExampleDetailStatePatterns on ExampleDetailState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Loaded value)?  loaded,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ExampleDetailState value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Error() when error != null:
-return error(_that);case _:
+case _ExampleDetailState() when $default != null:
+return $default(_that);case _:
   return orElse();
 
 }
@@ -80,14 +122,11 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Loaded value)  loaded,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ExampleDetailState value)  $default,){
 final _that = this;
 switch (_that) {
-case _Initial():
-return initial(_that);case _Loading():
-return loading(_that);case _Loaded():
-return loaded(_that);case _Error():
-return error(_that);case _:
+case _ExampleDetailState():
+return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -104,14 +143,11 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Loaded value)?  loaded,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ExampleDetailState value)?  $default,){
 final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Loaded() when loaded != null:
-return loaded(_that);case _Error() when error != null:
-return error(_that);case _:
+case _ExampleDetailState() when $default != null:
+return $default(_that);case _:
   return null;
 
 }
@@ -128,13 +164,10 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( ItemModel item)?  loaded,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LoadStatus status,  ItemModel? item,  Failure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial();case _Loading() when loading != null:
-return loading();case _Loaded() when loaded != null:
-return loaded(_that.item);case _Error() when error != null:
-return error(_that.failure);case _:
+case _ExampleDetailState() when $default != null:
+return $default(_that.status,_that.item,_that.failure);case _:
   return orElse();
 
 }
@@ -152,13 +185,10 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( ItemModel item)  loaded,required TResult Function( Failure failure)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LoadStatus status,  ItemModel? item,  Failure? failure)  $default,) {final _that = this;
 switch (_that) {
-case _Initial():
-return initial();case _Loading():
-return loading();case _Loaded():
-return loaded(_that.item);case _Error():
-return error(_that.failure);case _:
+case _ExampleDetailState():
+return $default(_that.status,_that.item,_that.failure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +205,10 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( ItemModel item)?  loaded,TResult? Function( Failure failure)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LoadStatus status,  ItemModel? item,  Failure? failure)?  $default,) {final _that = this;
 switch (_that) {
-case _Initial() when initial != null:
-return initial();case _Loading() when loading != null:
-return loading();case _Loaded() when loaded != null:
-return loaded(_that.item);case _Error() when error != null:
-return error(_that.failure);case _:
+case _ExampleDetailState() when $default != null:
+return $default(_that.status,_that.item,_that.failure);case _:
   return null;
 
 }
@@ -192,127 +219,67 @@ return error(_that.failure);case _:
 /// @nodoc
 
 
-class _Initial implements ExampleDetailState {
-  const _Initial();
+class _ExampleDetailState implements ExampleDetailState {
+  const _ExampleDetailState({this.status = LoadStatus.initial, this.item, this.failure});
   
 
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initial);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ExampleDetailState.initial()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class _Loading implements ExampleDetailState {
-  const _Loading();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loading);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ExampleDetailState.loading()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class _Loaded implements ExampleDetailState {
-  const _Loaded(this.item);
-  
-
- final  ItemModel item;
+@override@JsonKey() final  LoadStatus status;
+@override final  ItemModel? item;
+@override final  Failure? failure;
 
 /// Create a copy of ExampleDetailState
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _$identity);
+_$ExampleDetailStateCopyWith<_ExampleDetailState> get copyWith => __$ExampleDetailStateCopyWithImpl<_ExampleDetailState>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.item, item) || other.item == item));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExampleDetailState&&(identical(other.status, status) || other.status == status)&&(identical(other.item, item) || other.item == item)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,item);
+int get hashCode => Object.hash(runtimeType,status,item,failure);
 
 @override
 String toString() {
-  return 'ExampleDetailState.loaded(item: $item)';
+  return 'ExampleDetailState(status: $status, item: $item, failure: $failure)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$LoadedCopyWith<$Res> implements $ExampleDetailStateCopyWith<$Res> {
-  factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
-@useResult
+abstract mixin class _$ExampleDetailStateCopyWith<$Res> implements $ExampleDetailStateCopyWith<$Res> {
+  factory _$ExampleDetailStateCopyWith(_ExampleDetailState value, $Res Function(_ExampleDetailState) _then) = __$ExampleDetailStateCopyWithImpl;
+@override @useResult
 $Res call({
- ItemModel item
+ LoadStatus status, ItemModel? item, Failure? failure
 });
 
 
-$ItemModelCopyWith<$Res> get item;
+@override $ItemModelCopyWith<$Res>? get item;
 
 }
 /// @nodoc
-class __$LoadedCopyWithImpl<$Res>
-    implements _$LoadedCopyWith<$Res> {
-  __$LoadedCopyWithImpl(this._self, this._then);
+class __$ExampleDetailStateCopyWithImpl<$Res>
+    implements _$ExampleDetailStateCopyWith<$Res> {
+  __$ExampleDetailStateCopyWithImpl(this._self, this._then);
 
-  final _Loaded _self;
-  final $Res Function(_Loaded) _then;
+  final _ExampleDetailState _self;
+  final $Res Function(_ExampleDetailState) _then;
 
 /// Create a copy of ExampleDetailState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? item = null,}) {
-  return _then(_Loaded(
-null == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
-as ItemModel,
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? item = freezed,Object? failure = freezed,}) {
+  return _then(_ExampleDetailState(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as LoadStatus,item: freezed == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
+as ItemModel?,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as Failure?,
   ));
 }
 
@@ -320,78 +287,15 @@ as ItemModel,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ItemModelCopyWith<$Res> get item {
-  
-  return $ItemModelCopyWith<$Res>(_self.item, (value) {
+$ItemModelCopyWith<$Res>? get item {
+    if (_self.item == null) {
+    return null;
+  }
+
+  return $ItemModelCopyWith<$Res>(_self.item!, (value) {
     return _then(_self.copyWith(item: value));
   });
 }
-}
-
-/// @nodoc
-
-
-class _Error implements ExampleDetailState {
-  const _Error(this.failure);
-  
-
- final  Failure failure;
-
-/// Create a copy of ExampleDetailState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$ErrorCopyWith<_Error> get copyWith => __$ErrorCopyWithImpl<_Error>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Error&&(identical(other.failure, failure) || other.failure == failure));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,failure);
-
-@override
-String toString() {
-  return 'ExampleDetailState.error(failure: $failure)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$ErrorCopyWith<$Res> implements $ExampleDetailStateCopyWith<$Res> {
-  factory _$ErrorCopyWith(_Error value, $Res Function(_Error) _then) = __$ErrorCopyWithImpl;
-@useResult
-$Res call({
- Failure failure
-});
-
-
-
-
-}
-/// @nodoc
-class __$ErrorCopyWithImpl<$Res>
-    implements _$ErrorCopyWith<$Res> {
-  __$ErrorCopyWithImpl(this._self, this._then);
-
-  final _Error _self;
-  final $Res Function(_Error) _then;
-
-/// Create a copy of ExampleDetailState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
-  return _then(_Error(
-null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as Failure,
-  ));
-}
-
-
 }
 
 // dart format on

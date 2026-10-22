@@ -4,6 +4,7 @@ import 'package:flutter_starter/core/l10n/l10n_extension.dart';
 import 'package:flutter_starter/core/routes/app_navigator.dart';
 import 'package:flutter_starter/core/routes/route_names.dart';
 import 'package:flutter_starter/core/theme/app_spacing.dart';
+import 'package:flutter_starter/core/utils/load_status.dart';
 import 'package:flutter_starter/core/widgets/app_button.dart';
 import 'package:flutter_starter/core/widgets/app_empty_state.dart';
 import 'package:flutter_starter/core/widgets/app_error_state.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_starter/features/example/cubit/example_state.dart';
 import 'package:flutter_starter/features/example/data/models/item_model.dart';
 import 'package:flutter_starter/features/example/ui/example_detail_args.dart';
 import 'package:flutter_starter/features/example/ui/widgets/item_card.dart';
+import 'package:flutter_starter/l10n/generated/app_localizations.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ExampleScreen extends StatelessWidget {
@@ -84,6 +86,56 @@ class ExampleScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSkeleton() {
+    return Skeletonizer(
+      enabled: true,
+      child: ListView.separated(
+        padding: AppSpacing.edgeInsetsPage,
+        itemCount: 6,
+        separatorBuilder: (_, _) => AppSpacing.gapHMd,
+        itemBuilder: (_, index) => ItemCard(
+          item: ItemModel(
+            id: index + 1,
+            title: 'Loading item title placeholder',
+            body:
+                'Loading item description text that demonstrates shimmering bones...',
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList(
+    BuildContext context,
+    ExampleState state,
+    ExampleCubit cubit,
+    AppLocalizations l10n,
+  ) {
+    return InfiniteScrollList<ItemModel>(
+      items: state.items,
+      hasMore: state.hasMore,
+      isLoadingMore: state.isLoadingMore,
+      onRefresh: cubit.refresh,
+      onLoadMore: cubit.loadMore,
+      emptyWidget: AppEmptyState(
+        title: l10n.exampleEmptyTitle,
+        description: l10n.exampleEmptyMessage,
+        icon: Icons.list_alt_rounded,
+        ctaText: l10n.refresh,
+        onCtaPressed: cubit.loadItems,
+      ),
+      itemBuilder: (context, item, index) => ItemCard(
+        item: item,
+        onTap: () {
+          AppNavigator.pushNamed(
+            RouteNames.exampleDetail,
+            arguments: ExampleDetailArgs(itemId: item.id),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -106,52 +158,20 @@ class ExampleScreen extends StatelessWidget {
         builder: (context, state) {
           final cubit = context.read<ExampleCubit>();
 
-          return state.when(
-            initial: () => const SizedBox.shrink(),
-            loading: () => Skeletonizer(
-              enabled: true,
-              child: ListView.separated(
-                padding: AppSpacing.edgeInsetsPage,
-                itemCount: 6,
-                separatorBuilder: (_, _) => AppSpacing.gapHMd,
-                itemBuilder: (_, index) => ItemCard(
-                  item: ItemModel(
-                    id: index + 1,
-                    title: 'Loading item title placeholder',
-                    body:
-                        'Loading item description text that demonstrates shimmering bones...',
-                  ),
-                ),
-              ),
-            ),
-            error: (failure) =>
-                AppErrorState(failure: failure, onRetry: cubit.loadItems),
-            loaded: (items, hasMore, isLoadingMore, page) {
-              return InfiniteScrollList<ItemModel>(
-                items: items,
-                hasMore: hasMore,
-                isLoadingMore: isLoadingMore,
-                onRefresh: cubit.refresh,
-                onLoadMore: cubit.loadMore,
-                emptyWidget: AppEmptyState(
-                  title: l10n.exampleEmptyTitle,
-                  description: l10n.exampleEmptyMessage,
-                  icon: Icons.list_alt_rounded,
-                  ctaText: l10n.refresh,
-                  onCtaPressed: cubit.loadItems,
-                ),
-                itemBuilder: (context, item, index) => ItemCard(
-                  item: item,
-                  onTap: () {
-                    AppNavigator.pushNamed(
-                      RouteNames.exampleDetail,
-                      arguments: ExampleDetailArgs(itemId: item.id),
-                    );
-                  },
-                ),
-              );
-            },
-          );
+          return switch (state.status) {
+            LoadStatus.initial || LoadStatus.loading =>
+              state.items.isNotEmpty
+                  ? _buildList(context, state, cubit, l10n)
+                  : _buildSkeleton(),
+            LoadStatus.failure =>
+              state.items.isNotEmpty
+                  ? _buildList(context, state, cubit, l10n)
+                  : AppErrorState(
+                      failure: state.failure,
+                      onRetry: cubit.loadItems,
+                    ),
+            LoadStatus.success => _buildList(context, state, cubit, l10n),
+          };
         },
       ),
     );

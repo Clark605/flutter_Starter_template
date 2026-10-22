@@ -20,7 +20,7 @@ lib/features/<feature_name>/
 ### The 8 Rules:
 1. **No domain layer:** Cubits/Blocs depend on the repository interface (`data/repositories/<feature>_repository.dart`), never on the implementation or a data source.
 2. **Result types & backend-agnostic:** Repositories return plain `Future<T>`. Data sources and repositories throw; `guard()` in Cubit/Bloc is the only place errors become `Failure` / `Result<T>`. UI never sees transport packages (Dio, Firebase, Supabase, GraphQL). `ErrorMapper` uses pluggable mappers registered via `ErrorMapper.register()`.
-3. **Freezed unions & ActionGuard:** State classes are Freezed unions. Cubits/Blocs use `ActionGuard` for every async operation, supporting duplicate key rejection. For cancelling HTTP requests, pass Dio's `CancelToken` to the data source. `ActionGuard` does not access the service locator directly.
+3. **State pattern & ActionGuard:** State is ONE Freezed class with a `LoadStatus status` field, the feature data, and `Failure? failure` (set only when status is failure). Reloads keep existing data. Do not use sealed Freezed unions for load lifecycles. A plain enum may be the whole state only when there is no data. Cubits/Blocs use `ActionGuard` for every async operation, supporting duplicate key rejection. For cancelling HTTP requests, pass Dio's `CancelToken` to the data source. `ActionGuard` does not access the service locator directly.
 4. **Registration:** Repository impls use `@LazySingleton(as: <Feature>Repository)`. Cubits/Blocs use `@injectable`. Run codegen after changes.
 5. **Zero cross-feature imports:** Features never import other features. `lib/core/` never imports `lib/features/` (except the central `lib/core/routes/route_providers.dart` assembly root). Code needed by 2+ features moves to `lib/core/` immediately.
 6. **Thin screens:** Screens only read state, call Cubit methods, and render. UI files never import repository interfaces, repository implementations, or `core/di/injection.dart`.
@@ -38,13 +38,13 @@ lib/features/<feature_name>/
 - `services/`: Platform utilities (`ConnectivityService`).
 - `storage/`: `PrefsService`, `SecureStorageService`.
 - `theme/`: Theme tokens (`AppSpacing`, `AppRadius`, `AppColors`, `AppTypography`, `Breakpoints`).
-- `utils/`: `AppLogger`, `ResponsiveLayout`, `PaginationState`, `FormValidators`.
+- `utils/`: `AppLogger`, `LoadStatus`, `ResponsiveLayout`, `PaginationState`, `FormValidators`.
 - `widgets/`: Shared design system widgets (`AppButton`, `AppTextField`, `AppAvatar`, `StatusBadge`).
 
 ## 4. Mandatory New-Feature Checklist
 1. Create the feature directory structure as shown in Section 2.
 2. Model (Freezed) -> Data Source (throws) -> Repository Interface -> Repository Impl (throws).
-3. State (Freezed union) -> Cubit/Bloc extending `BaseCubit` or using `ActionGuard` (`guard()` returns `Result<T>`).
+3. State (Freezed class with `LoadStatus status`, data fields, `Failure? failure`) -> Cubit/Bloc extending `BaseCubit` or using `ActionGuard` (`guard()` returns `Result<T>`).
 4. Screen and private widgets using `lib/core/widgets/` and theme tokens. Screens consume Cubit via context.
 5. Add localized strings in `l10n/app_en.arb` and `l10n/app_ar.arb`.
 6. Add route name in `route_names.dart`, typed args in `ui/`, provider in `route_providers.dart`, and route in `app_router.dart`.
@@ -59,6 +59,7 @@ lib/features/<feature_name>/
 
 ## 5. Reference Implementation
 Always inspect and mirror `lib/features/example/`:
+- Shared Status: `lib/core/utils/load_status.dart`
 - Model: `features/example/data/models/item_model.dart`
 - Data Source: `features/example/data/datasources/item_remote_data_source.dart`
 - Repository: `features/example/data/repositories/item_repository.dart`
@@ -72,7 +73,7 @@ Always inspect and mirror `lib/features/example/`:
 - **Classes:** `PascalCase` (e.g., `ItemRepositoryImpl`).
 - **Interfaces:** Standard Flutter naming without `I` prefix; the implementation class appends `Impl` (e.g., `ItemRepository` interface, `ItemRepositoryImpl` implementation; `ItemRemoteDataSource` interface, `ItemRemoteDataSourceImpl` implementation).
 - **Models:** Suffix with `_model.dart` and class name `*Model` (e.g., `item_model.dart`, `ItemModel`).
-- **States:** Freezed unions (e.g., `ExampleState.initial()`, `ExampleState.loaded()`).
+- **States:** Single Freezed class with `LoadStatus` (e.g., `ExampleState(status: LoadStatus.initial, ...)`).
 - **Routes:** `RouteNames.exampleDetail = '/example-detail'`.
 - **L10n keys:** `camelCase` (e.g., `exampleTitle`, `errorNetwork`).
 
@@ -85,6 +86,9 @@ Always inspect and mirror `lib/features/example/`:
 - ❌ **DON'T** hardcode user strings, colors, or raw paddings.
 - ❌ **DON'T** use raw `try/catch` in Cubit/Bloc. Use `guard()`.
 - ❌ **DON'T** emit after close. `BaseCubit` and `ActionGuard` handle this.
+- ❌ **DON'T** clear existing data when a reload starts.
+- ❌ **DON'T** use `default:` when switching on `LoadStatus`.
+- ❌ **DON'T** use sealed Freezed unions for load lifecycles.
 - ✅ **DO** return plain `Future<T>` from repositories; data sources and repositories throw, and `guard()` in Cubit/Bloc returns `Result<T>`.
 - ✅ **DO** ensure touch targets >= 48px.
 - ✅ **DO** test both English and Arabic RTL layouts.

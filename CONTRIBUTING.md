@@ -50,7 +50,7 @@ Commit messages must adhere to the [Conventional Commits](https://www.convention
 Before modifying code, read [AGENTS.md](AGENTS.md) and [docs/architecture.md](docs/architecture.md). Every feature must adhere to the 8 Golden Rules:
 1. **No Domain Layer:** Cubits/Blocs depend on repository interfaces (`data/repositories/<feature>_repository.dart`), never on datasources or concrete implementations.
 2. **Result Types:** Data sources and repositories throw; `guard()` in Cubit/Bloc returns `Result<T>`. UI never sees transport packages (Dio, Firebase, Supabase, etc.).
-3. **Freezed Unions & ActionGuard:** States are Freezed unions. Async actions use `ActionGuard`.
+3. **State Pattern & ActionGuard:** States are single Freezed classes with `LoadStatus status`, data fields, and `Failure? failure`. Async actions use `ActionGuard`.
 4. **Registration:** Repositories use `@LazySingleton(as: <Feature>Repository)`. Cubits/Blocs use `@injectable`.
 5. **Zero Cross-Feature Imports:** Features cannot import other features. `lib/core/` cannot import `lib/features/` (except the central `route_providers.dart`).
 6. **Thin Screens:** Screens only read state from Cubit/Bloc and render. No repository or direct service locator imports in UI.

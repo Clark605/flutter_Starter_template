@@ -186,7 +186,7 @@ void _printRules() {
     '  Rule 2 [checked]: Result types - UI never sees transport types (Dio/Firebase/Supabase/GraphQL). Data sources and repositories throw; guard() returns Result<T>.',
   );
   stdout.writeln(
-    '  Rule 3 [not automated]: Freezed unions & ActionGuard - State classes are Freezed unions; Cubits/Blocs use ActionGuard for all async operations.',
+    '  Rule 3 [not automated]: State pattern & ActionGuard - State is ONE Freezed class with a LoadStatus status field, feature data, and Failure? failure; Cubits/Blocs use ActionGuard for all async operations.',
   );
   stdout.writeln(
     '  Rule 4 [not automated]: Registration - Repository implementations use @LazySingleton; Cubits/Blocs use @injectable.',

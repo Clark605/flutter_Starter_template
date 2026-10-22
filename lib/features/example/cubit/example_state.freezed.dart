@@ -14,30 +14,66 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ExampleState {
 
-
+ LoadStatus get status; List<ItemModel> get items; int get page; bool get hasMore; bool get isLoadingMore; Failure? get failure;
+/// Create a copy of ExampleState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ExampleStateCopyWith<ExampleState> get copyWith => _$ExampleStateCopyWithImpl<ExampleState>(this as ExampleState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.page, page) || other.page == page)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(items),page,hasMore,isLoadingMore,failure);
 
 @override
 String toString() {
-  return 'ExampleState()';
+  return 'ExampleState(status: $status, items: $items, page: $page, hasMore: $hasMore, isLoadingMore: $isLoadingMore, failure: $failure)';
 }
 
 
 }
 
 /// @nodoc
-class $ExampleStateCopyWith<$Res>  {
-$ExampleStateCopyWith(ExampleState _, $Res Function(ExampleState) __);
+abstract mixin class $ExampleStateCopyWith<$Res>  {
+  factory $ExampleStateCopyWith(ExampleState value, $Res Function(ExampleState) _then) = _$ExampleStateCopyWithImpl;
+@useResult
+$Res call({
+ LoadStatus status, List<ItemModel> items, int page, bool hasMore, bool isLoadingMore, Failure? failure
+});
+
+
+
+
+}
+/// @nodoc
+class _$ExampleStateCopyWithImpl<$Res>
+    implements $ExampleStateCopyWith<$Res> {
+  _$ExampleStateCopyWithImpl(this._self, this._then);
+
+  final ExampleState _self;
+  final $Res Function(ExampleState) _then;
+
+/// Create a copy of ExampleState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? items = null,Object? page = null,Object? hasMore = null,Object? isLoadingMore = null,Object? failure = freezed,}) {
+  return _then(_self.copyWith(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as LoadStatus,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
+as List<ItemModel>,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+as bool,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
+as bool,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as Failure?,
+  ));
+}
+
 }
 
 
@@ -55,14 +91,11 @@ extension ExampleStatePatterns on ExampleState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ExampleStateInitial value)?  initial,TResult Function( ExampleStateLoading value)?  loading,TResult Function( ExampleStateLoaded value)?  loaded,TResult Function( ExampleStateError value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ExampleState value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case ExampleStateInitial() when initial != null:
-return initial(_that);case ExampleStateLoading() when loading != null:
-return loading(_that);case ExampleStateLoaded() when loaded != null:
-return loaded(_that);case ExampleStateError() when error != null:
-return error(_that);case _:
+case _ExampleState() when $default != null:
+return $default(_that);case _:
   return orElse();
 
 }
@@ -80,14 +113,11 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ExampleStateInitial value)  initial,required TResult Function( ExampleStateLoading value)  loading,required TResult Function( ExampleStateLoaded value)  loaded,required TResult Function( ExampleStateError value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ExampleState value)  $default,){
 final _that = this;
 switch (_that) {
-case ExampleStateInitial():
-return initial(_that);case ExampleStateLoading():
-return loading(_that);case ExampleStateLoaded():
-return loaded(_that);case ExampleStateError():
-return error(_that);case _:
+case _ExampleState():
+return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -104,14 +134,11 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ExampleStateInitial value)?  initial,TResult? Function( ExampleStateLoading value)?  loading,TResult? Function( ExampleStateLoaded value)?  loaded,TResult? Function( ExampleStateError value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ExampleState value)?  $default,){
 final _that = this;
 switch (_that) {
-case ExampleStateInitial() when initial != null:
-return initial(_that);case ExampleStateLoading() when loading != null:
-return loading(_that);case ExampleStateLoaded() when loaded != null:
-return loaded(_that);case ExampleStateError() when error != null:
-return error(_that);case _:
+case _ExampleState() when $default != null:
+return $default(_that);case _:
   return null;
 
 }
@@ -128,13 +155,10 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( List<ItemModel> items,  bool hasMore,  bool isLoadingMore,  int page)?  loaded,TResult Function( Failure failure)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LoadStatus status,  List<ItemModel> items,  int page,  bool hasMore,  bool isLoadingMore,  Failure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case ExampleStateInitial() when initial != null:
-return initial();case ExampleStateLoading() when loading != null:
-return loading();case ExampleStateLoaded() when loaded != null:
-return loaded(_that.items,_that.hasMore,_that.isLoadingMore,_that.page);case ExampleStateError() when error != null:
-return error(_that.failure);case _:
+case _ExampleState() when $default != null:
+return $default(_that.status,_that.items,_that.page,_that.hasMore,_that.isLoadingMore,_that.failure);case _:
   return orElse();
 
 }
@@ -152,13 +176,10 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( List<ItemModel> items,  bool hasMore,  bool isLoadingMore,  int page)  loaded,required TResult Function( Failure failure)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LoadStatus status,  List<ItemModel> items,  int page,  bool hasMore,  bool isLoadingMore,  Failure? failure)  $default,) {final _that = this;
 switch (_that) {
-case ExampleStateInitial():
-return initial();case ExampleStateLoading():
-return loading();case ExampleStateLoaded():
-return loaded(_that.items,_that.hasMore,_that.isLoadingMore,_that.page);case ExampleStateError():
-return error(_that.failure);case _:
+case _ExampleState():
+return $default(_that.status,_that.items,_that.page,_that.hasMore,_that.isLoadingMore,_that.failure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +196,10 @@ return error(_that.failure);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( List<ItemModel> items,  bool hasMore,  bool isLoadingMore,  int page)?  loaded,TResult? Function( Failure failure)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LoadStatus status,  List<ItemModel> items,  int page,  bool hasMore,  bool isLoadingMore,  Failure? failure)?  $default,) {final _that = this;
 switch (_that) {
-case ExampleStateInitial() when initial != null:
-return initial();case ExampleStateLoading() when loading != null:
-return loading();case ExampleStateLoaded() when loaded != null:
-return loaded(_that.items,_that.hasMore,_that.isLoadingMore,_that.page);case ExampleStateError() when error != null:
-return error(_that.failure);case _:
+case _ExampleState() when $default != null:
+return $default(_that.status,_that.items,_that.page,_that.hasMore,_that.isLoadingMore,_that.failure);case _:
   return null;
 
 }
@@ -192,116 +210,54 @@ return error(_that.failure);case _:
 /// @nodoc
 
 
-class ExampleStateInitial implements ExampleState {
-  const ExampleStateInitial();
+class _ExampleState implements ExampleState {
+  const _ExampleState({this.status = LoadStatus.initial, final  List<ItemModel> items = const <ItemModel>[], this.page = 1, this.hasMore = true, this.isLoadingMore = false, this.failure}): _items = items;
   
 
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleStateInitial);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ExampleState.initial()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class ExampleStateLoading implements ExampleState {
-  const ExampleStateLoading();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleStateLoading);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ExampleState.loading()';
-}
-
-
-}
-
-
-
-
-/// @nodoc
-
-
-class ExampleStateLoaded implements ExampleState {
-  const ExampleStateLoaded({required final  List<ItemModel> items, this.hasMore = true, this.isLoadingMore = false, this.page = 1}): _items = items;
-  
-
+@override@JsonKey() final  LoadStatus status;
  final  List<ItemModel> _items;
- List<ItemModel> get items {
+@override@JsonKey() List<ItemModel> get items {
   if (_items is EqualUnmodifiableListView) return _items;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_items);
 }
 
-@JsonKey() final  bool hasMore;
-@JsonKey() final  bool isLoadingMore;
-@JsonKey() final  int page;
+@override@JsonKey() final  int page;
+@override@JsonKey() final  bool hasMore;
+@override@JsonKey() final  bool isLoadingMore;
+@override final  Failure? failure;
 
 /// Create a copy of ExampleState
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$ExampleStateLoadedCopyWith<ExampleStateLoaded> get copyWith => _$ExampleStateLoadedCopyWithImpl<ExampleStateLoaded>(this, _$identity);
+_$ExampleStateCopyWith<_ExampleState> get copyWith => __$ExampleStateCopyWithImpl<_ExampleState>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleStateLoaded&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.page, page) || other.page == page));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExampleState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.page, page) || other.page == page)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadingMore, isLoadingMore) || other.isLoadingMore == isLoadingMore)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),hasMore,isLoadingMore,page);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_items),page,hasMore,isLoadingMore,failure);
 
 @override
 String toString() {
-  return 'ExampleState.loaded(items: $items, hasMore: $hasMore, isLoadingMore: $isLoadingMore, page: $page)';
+  return 'ExampleState(status: $status, items: $items, page: $page, hasMore: $hasMore, isLoadingMore: $isLoadingMore, failure: $failure)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $ExampleStateLoadedCopyWith<$Res> implements $ExampleStateCopyWith<$Res> {
-  factory $ExampleStateLoadedCopyWith(ExampleStateLoaded value, $Res Function(ExampleStateLoaded) _then) = _$ExampleStateLoadedCopyWithImpl;
-@useResult
+abstract mixin class _$ExampleStateCopyWith<$Res> implements $ExampleStateCopyWith<$Res> {
+  factory _$ExampleStateCopyWith(_ExampleState value, $Res Function(_ExampleState) _then) = __$ExampleStateCopyWithImpl;
+@override @useResult
 $Res call({
- List<ItemModel> items, bool hasMore, bool isLoadingMore, int page
+ LoadStatus status, List<ItemModel> items, int page, bool hasMore, bool isLoadingMore, Failure? failure
 });
 
 
@@ -309,88 +265,24 @@ $Res call({
 
 }
 /// @nodoc
-class _$ExampleStateLoadedCopyWithImpl<$Res>
-    implements $ExampleStateLoadedCopyWith<$Res> {
-  _$ExampleStateLoadedCopyWithImpl(this._self, this._then);
+class __$ExampleStateCopyWithImpl<$Res>
+    implements _$ExampleStateCopyWith<$Res> {
+  __$ExampleStateCopyWithImpl(this._self, this._then);
 
-  final ExampleStateLoaded _self;
-  final $Res Function(ExampleStateLoaded) _then;
+  final _ExampleState _self;
+  final $Res Function(_ExampleState) _then;
 
 /// Create a copy of ExampleState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? items = null,Object? hasMore = null,Object? isLoadingMore = null,Object? page = null,}) {
-  return _then(ExampleStateLoaded(
-items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<ItemModel>,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? items = null,Object? page = null,Object? hasMore = null,Object? isLoadingMore = null,Object? failure = freezed,}) {
+  return _then(_ExampleState(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as LoadStatus,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
+as List<ItemModel>,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
 as bool,isLoadingMore: null == isLoadingMore ? _self.isLoadingMore : isLoadingMore // ignore: cast_nullable_to_non_nullable
-as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class ExampleStateError implements ExampleState {
-  const ExampleStateError(this.failure);
-  
-
- final  Failure failure;
-
-/// Create a copy of ExampleState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ExampleStateErrorCopyWith<ExampleStateError> get copyWith => _$ExampleStateErrorCopyWithImpl<ExampleStateError>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleStateError&&(identical(other.failure, failure) || other.failure == failure));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,failure);
-
-@override
-String toString() {
-  return 'ExampleState.error(failure: $failure)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $ExampleStateErrorCopyWith<$Res> implements $ExampleStateCopyWith<$Res> {
-  factory $ExampleStateErrorCopyWith(ExampleStateError value, $Res Function(ExampleStateError) _then) = _$ExampleStateErrorCopyWithImpl;
-@useResult
-$Res call({
- Failure failure
-});
-
-
-
-
-}
-/// @nodoc
-class _$ExampleStateErrorCopyWithImpl<$Res>
-    implements $ExampleStateErrorCopyWith<$Res> {
-  _$ExampleStateErrorCopyWithImpl(this._self, this._then);
-
-  final ExampleStateError _self;
-  final $Res Function(ExampleStateError) _then;
-
-/// Create a copy of ExampleState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
-  return _then(ExampleStateError(
-null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as Failure,
+as bool,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as Failure?,
   ));
 }
 

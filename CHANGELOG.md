@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Feature-First Architecture**: Strictly structured `lib/features/<name>/` with data (models, datasources, repository interface + implementation), cubit/bloc, and thin UI layers.
-- **State Management**: `flutter_bloc` with demonstrated reference implementations for both `Cubit` (`ExampleCubit`) and `Bloc` (`ExampleDetailBloc`).
+- **State Management**: `flutter_bloc` with single Freezed data classes and `LoadStatus` enum for load lifecycles, demonstrated in `ExampleCubit` and `ExampleDetailBloc`.
 - **Resilient ActionGuard**:
   - Double-submit and re-entrant prevention using action keys.
   - For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
