@@ -20,7 +20,7 @@ lib/features/<feature_name>/
 ### The 8 Rules:
 1. **No domain layer:** Cubits/Blocs depend on the repository interface (`data/repositories/<feature>_repository.dart`), never on the implementation or a data source.
 2. **Result types & backend-agnostic:** Repositories return plain `Future<T>`. Data sources and repositories throw; `guard()` in Cubit/Bloc is the only place errors become `Failure` / `Result<T>`. UI never sees transport packages (Dio, Firebase, Supabase, GraphQL). `ErrorMapper` uses pluggable mappers registered via `ErrorMapper.register()`.
-3. **Freezed unions & ActionGuard:** State classes are Freezed unions. Cubits/Blocs use `ActionGuard` for every async operation, supporting duplicate key rejection (`Failure.duplicate`). For cancelling HTTP requests, pass Dio's `CancelToken` to the data source. `ActionGuard` does not access the service locator directly.
+3. **Freezed unions & ActionGuard:** State classes are Freezed unions. Cubits/Blocs use `ActionGuard` for every async operation, supporting duplicate key rejection. For cancelling HTTP requests, pass Dio's `CancelToken` to the data source. `ActionGuard` does not access the service locator directly.
 4. **Registration:** Repository impls use `@LazySingleton(as: <Feature>Repository)`. Cubits/Blocs use `@injectable`. Run codegen after changes.
 5. **Zero cross-feature imports:** Features never import other features. `lib/core/` never imports `lib/features/` (except the central `lib/core/routes/route_providers.dart` assembly root). Code needed by 2+ features moves to `lib/core/` immediately.
 6. **Thin screens:** Screens only read state, call Cubit methods, and render. UI files never import repository interfaces, repository implementations, or `core/di/injection.dart`.

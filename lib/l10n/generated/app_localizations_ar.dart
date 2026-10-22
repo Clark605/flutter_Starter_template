@@ -163,9 +163,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorServer => 'حدث خطأ في الخادم. يرجى المحاولة في وقت لاحق.';
 
   @override
-  String get errorDuplicate => 'هذا الإجراء قيد التنفيذ بالفعل. يرجى الانتظار.';
-
-  @override
   String get errorCancelled => 'تم إلغاء العملية.';
 
   @override

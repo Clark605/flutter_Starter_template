@@ -56,7 +56,6 @@
   "errorConflict": "A conflict occurred with the current state of the resource. Please refresh and try again.",
   "errorValidation": "The provided information is invalid.",
   "errorServer": "A server error occurred. Please try again later.",
-  "errorDuplicate": "This action is already in progress. Please wait.",
   "errorCancelled": "The operation was cancelled.",
   "errorUnknown": "An unexpected error occurred. Please try again.",
 

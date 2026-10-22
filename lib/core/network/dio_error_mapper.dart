@@ -64,20 +64,17 @@ Failure? mapDioException(Object error, [StackTrace? stackTrace]) {
         429 => Failure.server(
           code: 'TOO_MANY_REQUESTS',
           statusCode: 429,
-          isRetryable: true,
           originalError: error,
           stackTrace: stackTrace,
         ),
         502 || 503 || 504 => Failure.server(
           code: 'SERVER_UNAVAILABLE',
           statusCode: status,
-          isRetryable: true,
           originalError: error,
           stackTrace: stackTrace,
         ),
         _ => Failure.server(
           statusCode: status,
-          isRetryable: false,
           originalError: error,
           stackTrace: stackTrace,
         ),

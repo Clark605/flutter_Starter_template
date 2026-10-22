@@ -22,7 +22,7 @@ class ActionGuardConfig {
 /// - Explicit [Result<T>] returns.
 /// - Central exception mapping via [ErrorMapper].
 /// - Closed-state safety checks.
-/// - Double-submit / re-entrancy prevention via action [key] (returning [Failure.duplicate]).
+/// - Double-submit / re-entrancy prevention via action [key] (returning [Failure.cancelled] with code 'DUPLICATE_ACTION').
 /// - Release-safe logging and unexpected error forwarding via [ActionGuardConfig.crashReporter].
 mixin ActionGuard<S> on BlocBase<S> {
   final Set<String> _inFlightActionKeys = <String>{};
@@ -33,7 +33,7 @@ mixin ActionGuard<S> on BlocBase<S> {
   /// Guards an async [action], catching all errors and returning a typed [Result<T>].
   ///
   /// [key]: Optional unique key. If provided and an action with this key is already
-  /// running, the call is rejected returning [Failure.duplicate] to prevent double-submit.
+  /// running, the call is rejected returning [Failure.cancelled] with code 'DUPLICATE_ACTION' to prevent double-submit.
   ///
   /// [emitter]: Optional [Emitter] if called from inside a Bloc event handler.
   Future<Result<T>> guard<T>(
@@ -47,7 +47,9 @@ mixin ActionGuard<S> on BlocBase<S> {
     if (key != null) {
       if (_inFlightActionKeys.contains(key)) {
         AppLogger.debug('Rejected duplicate action for key: $key', tag: tag);
-        return const Result.failure(Failure.duplicate());
+        return const Result.failure(
+          Failure.cancelled(code: 'DUPLICATE_ACTION'),
+        );
       }
       _inFlightActionKeys.add(key);
     }
@@ -80,11 +82,6 @@ mixin ActionGuard<S> on BlocBase<S> {
   void _logAndReportFailure(Failure failure, String tag) {
     if (failure is CancelledFailure) {
       AppLogger.debug('Action cancelled in $tag (${failure.code})', tag: tag);
-      return;
-    }
-
-    if (failure is DuplicateFailure) {
-      AppLogger.debug('Duplicate action rejected in $tag', tag: tag);
       return;
     }
 

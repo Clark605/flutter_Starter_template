@@ -24,7 +24,7 @@ flowchart TD
         RepoImpl["FeatureRepositoryImpl\n(@LazySingleton)"]
         RemoteDS["RemoteDataSource\n(Dio / Firebase / etc.)"]
         LocalDS["LocalDataSource\n(Drift / SharedPreferences)"]
-        DTO["DTO Models\n(Freezed + JSON)"]
+        DTO["Models\n(Freezed + JSON)"]
 
         RepoImpl --> RemoteDS
         RepoImpl --> LocalDS
@@ -53,9 +53,9 @@ In `flutter_starter`:
 `ActionGuard<S>` is a robust mixin on `BlocBase<S>` that encapsulates asynchronous safety, duplicate suppression, and error handling. For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
 
 ### Features & Protections:
-- **Explicit Result Types**: Returns `Result<T>` (`Success` or `Error`).
+- **Explicit Result Types**: Returns `Result<T>` (`Success` or `Failure`).
 - **Closed-State Safety**: Checks whether the Cubit is closed or `Emitter.isDone` before and after async operations.
-- **Double-Submit Prevention (`key`)**: Concurrent invocations sharing the same action `key` reject the duplicate call with `Failure.duplicate` (`code: 'DUPLICATE_ACTION'`).
+- **Double-Submit Prevention (`key`)**: Concurrent invocations sharing the same action `key` reject the duplicate call with `Failure.cancelled(code: 'DUPLICATE_ACTION')`.
 - **Decoupled Crash Reporting**: Decoupled from the service locator via `ActionGuardConfig.crashReporter` configured during `bootstrap()`.
 - **Single Retry Layer**: Automatic retry for transient HTTP failures is handled at the network level by `RetryInterceptor`.
 
@@ -124,8 +124,6 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
 }
 ```
 
-For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
-
 ---
 
 ## 3. Pluggable Error Mapping & Failures
@@ -133,16 +131,15 @@ For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
 Errors are mapped centrally without coupling core models to specific network transports.
 
 ### Sealed `Failure` Hierarchy:
-- `NetworkFailure` (`NETWORK_ERROR`, isRetryable: true)
-- `TimeoutFailure` (`TIMEOUT_ERROR`, isRetryable: true)
+- `NetworkFailure` (`NETWORK_ERROR`)
+- `TimeoutFailure` (`TIMEOUT_ERROR`)
 - `UnauthorizedFailure` (`UNAUTHORIZED`, triggers session expiration)
 - `ForbiddenFailure` (`FORBIDDEN`)
 - `NotFoundFailure` (`NOT_FOUND`)
 - `ConflictFailure` (`CONFLICT`, HTTP 409 or duplicate resource)
 - `ValidationFailure` (`VALIDATION_ERROR`, includes `fieldErrors` map)
-- `ServerFailure` (`SERVER_ERROR`, carries `statusCode` and `isRetryable`)
-- `DuplicateFailure` (`DUPLICATE_ACTION`, rejected double-submit)
-- `CancelledFailure` (`CANCELLED`, cooperative cancellation)
+- `ServerFailure` (`SERVER_ERROR`, carries `statusCode`)
+- `CancelledFailure` (`CANCELLED`, bloc closed or request cancelled)
 - `UnknownFailure` (`UNKNOWN_ERROR`)
 
 ### Pluggable Mapper Registry:
@@ -173,9 +170,9 @@ ErrorMapper.register((error, stackTrace) {
 - `408` -> `Failure.timeout(code: 'REQUEST_TIMEOUT')`.
 - `409` -> `Failure.conflict(code: 'CONFLICT')`.
 - `422` -> `Failure.validation(code: 'UNPROCESSABLE_ENTITY')` with field errors.
-- `429` -> `Failure.server(code: 'TOO_MANY_REQUESTS', isRetryable: true)`.
-- `502`, `503`, `504` -> `Failure.server(code: 'SERVER_UNAVAILABLE', isRetryable: true)`.
-- Other `5xx` -> `Failure.server(isRetryable: false)`.
+- `429` -> `Failure.server(code: 'TOO_MANY_REQUESTS')`.
+- `502`, `503`, `504` -> `Failure.server(code: 'SERVER_UNAVAILABLE')`.
+- Other `5xx` -> `Failure.server()`.
 
 ---
 
@@ -212,7 +209,7 @@ AppRouter.authRedirect = (routeName) {
 
 ## 5. Startup Bootstrap Sequence
 
-The application boot flow in [`lib/bootstrap.dart`](file:///d:/MyProgrammingProjects/FlutterProjects/my_flutter_template/lib/bootstrap.dart) is engineered for resilience, ensuring the splash screen is never hung:
+The application boot flow in [`lib/bootstrap.dart`](../lib/bootstrap.dart) is engineered for resilience, ensuring the splash screen is never hung:
 
 1. **Native Splash Preservation**: Calls `FlutterNativeSplash.preserve()` immediately after `WidgetsFlutterBinding.ensureInitialized()` to prevent white/black flash before initial frame.
 2. **Early Error Buffering**: Installs `FlutterError.onError` and `PlatformDispatcher.instance.onError` before DI. Logs all errors immediately and buffers them in memory.
@@ -239,8 +236,8 @@ dart run tool/check_architecture.dart --list-rules
 ```
 
 ### The 8 Rules:
-1. **Rule 1: No domain layer**: Cubits/Blocs depend on repository interfaces (`data/repositories/i_*`), never on data sources (`data/datasources/`) or concrete implementations (`*_impl.dart`).
-2. **Rule 2: Result types**: UI never sees transport types (Dio, Firebase, Supabase, GraphQL). Errors are converted to `Failure`.
+1. **Rule 1: No domain layer**: Cubits/Blocs depend on repository interfaces (`data/repositories/<feature>_repository.dart`), never on data sources (`data/datasources/`) or concrete implementations (`*_impl.dart`).
+2. **Rule 2: Result types**: UI never sees transport types (Dio, Firebase, Supabase, GraphQL). Data sources and repositories throw; `guard()` returns `Result<T>`.
 3. **Rule 3: Freezed unions & ActionGuard**: State classes are Freezed unions; Cubits/Blocs use `ActionGuard` for all async operations.
 4. **Rule 4: Registration**: Repository implementations use `@LazySingleton`; Cubits/Blocs use `@injectable`.
 5. **Rule 5: Zero cross-feature imports**: Features never import other features. `lib/core/` cannot import `lib/features/` (except the central `route_providers.dart` assembly root).

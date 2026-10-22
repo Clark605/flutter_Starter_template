@@ -14,11 +14,6 @@ sealed class Failure {
     this.stackTrace,
   });
 
-  bool get isRetryable =>
-      this is NetworkFailure ||
-      this is TimeoutFailure ||
-      (this is ServerFailure && (this as ServerFailure).isRetryable);
-
   String localizedMessage(BuildContext context) {
     final l10n = context.l10n;
     return switch (this) {
@@ -30,7 +25,6 @@ sealed class Failure {
       ConflictFailure() => l10n.errorConflict,
       ValidationFailure() => l10n.errorValidation,
       ServerFailure() => l10n.errorServer,
-      DuplicateFailure() => l10n.errorDuplicate,
       CancelledFailure() => l10n.errorCancelled,
       UnknownFailure() => l10n.errorUnknown,
     };
@@ -90,17 +84,9 @@ sealed class Failure {
     String code,
     String localizationKey,
     int? statusCode,
-    bool isRetryable,
     Object? originalError,
     StackTrace? stackTrace,
   }) = ServerFailure;
-
-  const factory Failure.duplicate({
-    String code,
-    String localizationKey,
-    Object? originalError,
-    StackTrace? stackTrace,
-  }) = DuplicateFailure;
 
   const factory Failure.cancelled({
     String code,
@@ -185,23 +171,11 @@ class ValidationFailure extends Failure {
 
 class ServerFailure extends Failure {
   final int? statusCode;
-  @override
-  final bool isRetryable;
 
   const ServerFailure({
     super.code = 'SERVER_ERROR',
     super.localizationKey = 'errorServer',
     this.statusCode,
-    this.isRetryable = false,
-    super.originalError,
-    super.stackTrace,
-  });
-}
-
-class DuplicateFailure extends Failure {
-  const DuplicateFailure({
-    super.code = 'DUPLICATE_ACTION',
-    super.localizationKey = 'errorDuplicate',
     super.originalError,
     super.stackTrace,
   });

@@ -90,19 +90,32 @@ Future<void> bootstrap() async {
     // 2. Initialize Crash Reporter and flush pre-initialization buffered errors
     if (getIt.isRegistered<ICrashReporter>()) {
       final crashReporter = getIt<ICrashReporter>();
-      await crashReporter.init();
-      isCrashReporterReady = true;
-      ActionGuardConfig.crashReporter = crashReporter;
-
-      for (final buffered in preInitErrors) {
-        await crashReporter.recordError(
-          buffered.error,
-          buffered.stack,
-          reason: buffered.reason,
-          fatal: buffered.fatal,
+      try {
+        await crashReporter.init();
+        isCrashReporterReady = true;
+      } on Object catch (e, st) {
+        AppLogger.warning(
+          'Crash reporter initialization failed; continuing without crash reporter.',
+          tag: 'Startup',
+          error: e,
+          stackTrace: st,
         );
+        isCrashReporterReady = false;
       }
-      preInitErrors.clear();
+
+      if (isCrashReporterReady) {
+        ActionGuardConfig.crashReporter = crashReporter;
+
+        for (final buffered in preInitErrors) {
+          await crashReporter.recordError(
+            buffered.error,
+            buffered.stack,
+            reason: buffered.reason,
+            fatal: buffered.fatal,
+          );
+        }
+        preInitErrors.clear();
+      }
     }
 
     // 3. Initialize Remote Config with timeout fallback

@@ -392,12 +392,6 @@ abstract class AppLocalizations {
   /// **'A server error occurred. Please try again later.'**
   String get errorServer;
 
-  /// No description provided for @errorDuplicate.
-  ///
-  /// In en, this message translates to:
-  /// **'This action is already in progress. Please wait.'**
-  String get errorDuplicate;
-
   /// No description provided for @errorCancelled.
   ///
   /// In en, this message translates to:

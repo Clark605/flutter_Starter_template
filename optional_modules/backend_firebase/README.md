@@ -39,7 +39,6 @@ Failure? mapFirebaseException(Object error, [StackTrace? stackTrace]) {
       ),
       'unavailable' || 'deadline-exceeded' => Failure.server(
         code: error.code,
-        isRetryable: true,
         originalError: error,
         stackTrace: stackTrace,
       ),

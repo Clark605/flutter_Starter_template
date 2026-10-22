@@ -164,10 +164,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorServer => 'A server error occurred. Please try again later.';
 
   @override
-  String get errorDuplicate =>
-      'This action is already in progress. Please wait.';
-
-  @override
   String get errorCancelled => 'The operation was cancelled.';
 
   @override
