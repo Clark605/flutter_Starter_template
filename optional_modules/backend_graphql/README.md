@@ -45,4 +45,4 @@ ErrorMapper.register(mapGraphQLException);
 2. Register it with `@LazySingleton(as: ItemRemoteDataSource)`.
 3. Wrap GraphQL queries inside the data source and return `ItemModel`.
 4. Register the error mapper with `ErrorMapper.register(mapGraphQLException)`.
-5. The repository and presentation layers remain backend-agnostic.
+5. Data sources and repositories throw; `guard()` in Cubit/Bloc returns `Result<T>`. The presentation layers remain backend-agnostic.

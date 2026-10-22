@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ExampleDetailEvent {
 
- int get id; ActionToken? get token;
+ int get id;
 /// Create a copy of ExampleDetailEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ExampleDetailEventCopyWith<ExampleDetailEvent> get copyWith => _$ExampleDetailE
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleDetailEvent&&(identical(other.id, id) || other.id == id)&&(identical(other.token, token) || other.token == token));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExampleDetailEvent&&(identical(other.id, id) || other.id == id));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,token);
+int get hashCode => Object.hash(runtimeType,id);
 
 @override
 String toString() {
-  return 'ExampleDetailEvent(id: $id, token: $token)';
+  return 'ExampleDetailEvent(id: $id)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ExampleDetailEventCopyWith<$Res>  {
   factory $ExampleDetailEventCopyWith(ExampleDetailEvent value, $Res Function(ExampleDetailEvent) _then) = _$ExampleDetailEventCopyWithImpl;
 @useResult
 $Res call({
- int id, ActionToken? token
+ int id
 });
 
 
@@ -62,11 +62,10 @@ class _$ExampleDetailEventCopyWithImpl<$Res>
 
 /// Create a copy of ExampleDetailEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? token = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as ActionToken?,
+as int,
   ));
 }
 
@@ -154,11 +153,11 @@ return refresh(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int id,  ActionToken? token)?  load,TResult Function( int id,  ActionToken? token)?  refresh,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int id)?  load,TResult Function( int id)?  refresh,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that.id,_that.token);case _Refresh() when refresh != null:
-return refresh(_that.id,_that.token);case _:
+return load(_that.id);case _Refresh() when refresh != null:
+return refresh(_that.id);case _:
   return orElse();
 
 }
@@ -176,11 +175,11 @@ return refresh(_that.id,_that.token);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int id,  ActionToken? token)  load,required TResult Function( int id,  ActionToken? token)  refresh,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int id)  load,required TResult Function( int id)  refresh,}) {final _that = this;
 switch (_that) {
 case _Load():
-return load(_that.id,_that.token);case _Refresh():
-return refresh(_that.id,_that.token);case _:
+return load(_that.id);case _Refresh():
+return refresh(_that.id);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,11 +196,11 @@ return refresh(_that.id,_that.token);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int id,  ActionToken? token)?  load,TResult? Function( int id,  ActionToken? token)?  refresh,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int id)?  load,TResult? Function( int id)?  refresh,}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that.id,_that.token);case _Refresh() when refresh != null:
-return refresh(_that.id,_that.token);case _:
+return load(_that.id);case _Refresh() when refresh != null:
+return refresh(_that.id);case _:
   return null;
 
 }
@@ -213,11 +212,10 @@ return refresh(_that.id,_that.token);case _:
 
 
 class _Load implements ExampleDetailEvent {
-  const _Load(this.id, {this.token});
+  const _Load(this.id);
   
 
 @override final  int id;
-@override final  ActionToken? token;
 
 /// Create a copy of ExampleDetailEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +227,16 @@ _$LoadCopyWith<_Load> get copyWith => __$LoadCopyWithImpl<_Load>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Load&&(identical(other.id, id) || other.id == id)&&(identical(other.token, token) || other.token == token));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Load&&(identical(other.id, id) || other.id == id));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,token);
+int get hashCode => Object.hash(runtimeType,id);
 
 @override
 String toString() {
-  return 'ExampleDetailEvent.load(id: $id, token: $token)';
+  return 'ExampleDetailEvent.load(id: $id)';
 }
 
 
@@ -249,7 +247,7 @@ abstract mixin class _$LoadCopyWith<$Res> implements $ExampleDetailEventCopyWith
   factory _$LoadCopyWith(_Load value, $Res Function(_Load) _then) = __$LoadCopyWithImpl;
 @override @useResult
 $Res call({
- int id, ActionToken? token
+ int id
 });
 
 
@@ -266,11 +264,10 @@ class __$LoadCopyWithImpl<$Res>
 
 /// Create a copy of ExampleDetailEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? token = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,}) {
   return _then(_Load(
 null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as ActionToken?,
+as int,
   ));
 }
 
@@ -281,11 +278,10 @@ as ActionToken?,
 
 
 class _Refresh implements ExampleDetailEvent {
-  const _Refresh(this.id, {this.token});
+  const _Refresh(this.id);
   
 
 @override final  int id;
-@override final  ActionToken? token;
 
 /// Create a copy of ExampleDetailEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -297,16 +293,16 @@ _$RefreshCopyWith<_Refresh> get copyWith => __$RefreshCopyWithImpl<_Refresh>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Refresh&&(identical(other.id, id) || other.id == id)&&(identical(other.token, token) || other.token == token));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Refresh&&(identical(other.id, id) || other.id == id));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,token);
+int get hashCode => Object.hash(runtimeType,id);
 
 @override
 String toString() {
-  return 'ExampleDetailEvent.refresh(id: $id, token: $token)';
+  return 'ExampleDetailEvent.refresh(id: $id)';
 }
 
 
@@ -317,7 +313,7 @@ abstract mixin class _$RefreshCopyWith<$Res> implements $ExampleDetailEventCopyW
   factory _$RefreshCopyWith(_Refresh value, $Res Function(_Refresh) _then) = __$RefreshCopyWithImpl;
 @override @useResult
 $Res call({
- int id, ActionToken? token
+ int id
 });
 
 
@@ -334,11 +330,10 @@ class __$RefreshCopyWithImpl<$Res>
 
 /// Create a copy of ExampleDetailEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? token = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,}) {
   return _then(_Refresh(
 null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as ActionToken?,
+as int,
   ));
 }
 

@@ -39,7 +39,7 @@ Commit messages must adhere to the [Conventional Commits](https://www.convention
 - `test`: Adding or correcting tests.
 
 ### Examples:
-- `feat(core): add ActionToken cooperative cancellation to ActionGuard`
+- `feat(example): add item pagination support`
 - `fix(network): map HTTP 409 to Failure.conflict`
 - `docs(flavors): document Android release signing keys`
 
@@ -48,10 +48,10 @@ Commit messages must adhere to the [Conventional Commits](https://www.convention
 ## 3. Architecture Rules & The 8 Golden Rules
 
 Before modifying code, read [AGENTS.md](AGENTS.md) and [docs/architecture.md](docs/architecture.md). Every feature must adhere to the 8 Golden Rules:
-1. **No Domain Layer:** Cubits/Blocs depend on `data/repositories/i_*`, never on datasources or concrete implementations.
-2. **Result Types:** Repositories return `Result<T>`. UI never sees transport packages (Dio, Firebase, Supabase, etc.).
+1. **No Domain Layer:** Cubits/Blocs depend on repository interfaces (`data/repositories/<feature>_repository.dart`), never on datasources or concrete implementations.
+2. **Result Types:** Data sources and repositories throw; `guard()` in Cubit/Bloc returns `Result<T>`. UI never sees transport packages (Dio, Firebase, Supabase, etc.).
 3. **Freezed Unions & ActionGuard:** States are Freezed unions. Async actions use `ActionGuard`.
-4. **Registration:** Repositories use `@LazySingleton(as: IRepository)`. Cubits/Blocs use `@injectable`.
+4. **Registration:** Repositories use `@LazySingleton(as: <Feature>Repository)`. Cubits/Blocs use `@injectable`.
 5. **Zero Cross-Feature Imports:** Features cannot import other features. `lib/core/` cannot import `lib/features/` (except the central `route_providers.dart`).
 6. **Thin Screens:** Screens only read state from Cubit/Bloc and render. No repository or direct service locator imports in UI.
 7. **L10n & Central Routing:** Strings must be localized in `app_en.arb` and `app_ar.arb`. Routes are declared in `RouteNames` and `AppRouter`.

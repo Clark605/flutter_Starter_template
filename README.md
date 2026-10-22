@@ -30,7 +30,7 @@ flowchart TD
     end
 
     subgraph Domain ["Repository boundary (interface in data/)"]
-        RepoInterface["IFeatureRepository\n(Returns Result<T>)"]
+        RepoInterface["FeatureRepository\n(Returns Future<T>)"]
     end
 
     subgraph Data ["Data Layer"]
@@ -52,9 +52,9 @@ flowchart TD
 ## ✨ Features & Capabilities
 
 - **State Management**: `flutter_bloc` with both **Cubit** and **Bloc** demonstrated and supported.
-- **Guarded Actions (`ActionGuard`)**: Closed-state safety, cooperative cancellation via `ActionToken`, re-entrant double-submit prevention (`Failure.duplicate`), automatic retry with exponential backoff, and pluggable error mapping. Decoupled from direct service locator access.
+- **Guarded Actions (`ActionGuard`)**: Closed-state safety, re-entrant double-submit prevention (`Failure.duplicate`), and pluggable error mapping. Repositories and data sources throw; `guard()` returns `Result<T>`. For cancelling HTTP requests, pass Dio's `CancelToken` to the data source. Decoupled from direct service locator access.
 - **Errors & Results**: Sealed `Result<T>` (`Success`, `Error`) and typed `Failure` hierarchy (`network`, `timeout`, `unauthorized`, `forbidden`, `notFound`, `conflict`, `validation`, `server`, `duplicate`, `cancelled`, `unknown`) carrying stable error codes and translation keys. Pluggable `ErrorMapper` registry.
-- **Navigation & Guarding**: Central routing via `AppRouter` with typed route arguments (`ExampleDetailArgs`), invalid route fallback to 404 (`buildNotFoundRoute`), and pluggable `IAuthRedirect` for protected routes (`RouteNames.protectedRoutes`).
+- **Navigation & Guarding**: Central routing via `AppRouter` with typed route arguments (`ExampleDetailArgs`), invalid route fallback to 404 (`buildNotFoundRoute`), and pluggable `AuthRedirect` for route redirects.
 - **Material 3 Theming**: Design tokens (`AppSpacing`, `AppRadius`, `AppDurations`, `Breakpoints`), dark/light themes, and locale-aware typography (Inter for English, IBM Plex Sans Arabic for Arabic).
 - **Full Localization (en + ar)**: ARB-driven localizations with RTL layout safety.
 - **Networking**: Dio module with timeouts, JSON headers, `AuthInterceptor` slot driven by `TokenProvider`, exponential retry interceptor, web-safe socket checks, and debug-only sanitized logging.
@@ -153,7 +153,7 @@ lib/
 │   ├── services/                  # ConnectivityService
 │   ├── storage/                   # PrefsService, SecureStorageService
 │   ├── theme/                     # AppSpacing, AppRadius, AppColors, AppTypography
-│   ├── utils/                     # AppLogger, ActionToken, ResponsiveLayout, PaginationState, Validators
+│   ├── utils/                     # AppLogger, ResponsiveLayout, PaginationState, Validators
 │   └── widgets/                   # AppButton, AppTextField, AppAvatar, StatusBadge, etc.
 └── features/
     └── example/                   # Complete reference feature implementation

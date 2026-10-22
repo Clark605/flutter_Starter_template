@@ -1,5 +1,3 @@
-import 'package:flutter_starter/core/errors/error_mapper.dart';
-import 'package:flutter_starter/core/errors/result.dart';
 import 'package:flutter_starter/features/example/data/datasources/item_remote_data_source.dart';
 import 'package:flutter_starter/features/example/data/models/item_model.dart';
 import 'package:flutter_starter/features/example/data/repositories/item_repository.dart';
@@ -12,41 +10,13 @@ class ItemRepositoryImpl implements ItemRepository {
   ItemRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<Result<List<ItemModel>>> getItems({
-    int page = 1,
-    int limit = 20,
-  }) async {
-    try {
-      final items = await _remoteDataSource.getItems(page: page, limit: limit);
-      return Result.success(items);
-    } on Object catch (e, st) {
-      return Result.failure(ErrorMapper.map(e, st));
-    }
-  }
+  Future<List<ItemModel>> getItems({int page = 1, int limit = 20}) =>
+      _remoteDataSource.getItems(page: page, limit: limit);
 
   @override
-  Future<Result<ItemModel>> getItem(int id) async {
-    try {
-      final item = await _remoteDataSource.getItem(id);
-      return Result.success(item);
-    } on Object catch (e, st) {
-      return Result.failure(ErrorMapper.map(e, st));
-    }
-  }
+  Future<ItemModel> getItem(int id) => _remoteDataSource.getItem(id);
 
   @override
-  Future<Result<ItemModel>> createItem({
-    required String title,
-    required String body,
-  }) async {
-    try {
-      final created = await _remoteDataSource.createItem(
-        title: title,
-        body: body,
-      );
-      return Result.success(created);
-    } on Object catch (e, st) {
-      return Result.failure(ErrorMapper.map(e, st));
-    }
-  }
+  Future<ItemModel> createItem({required String title, required String body}) =>
+      _remoteDataSource.createItem(title: title, body: body);
 }

@@ -59,7 +59,8 @@ ErrorMapper.register(mapFirebaseException);
 
 ## 3. Architecture Swap Point
 
-In this architecture, Cubits and Blocs depend strictly on `ItemRepository` (which returns `Result<T>`).
+In this architecture, Cubits and Blocs depend strictly on `ItemRepository`.
+Data sources and repositories throw on error; `guard()` in Cubit/Bloc returns `Result<T>`.
 The repository delegates to `ItemRemoteDataSource`.
 
 To switch to Firebase:

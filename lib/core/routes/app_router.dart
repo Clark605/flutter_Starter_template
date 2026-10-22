@@ -2,29 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_starter/core/routes/route_names.dart';
 import 'package:flutter_starter/core/routes/route_providers.dart';
 
-/// Pluggable redirect interface for navigation guards.
-abstract interface class IAuthRedirect {
-  /// Returns a redirect route (e.g. `RouteNames.onboarding` or `/login`),
-  /// or `null` if navigation to [routeName] should proceed normally.
-  String? redirect(String? routeName);
-}
-
-/// Default no-op implementation of [IAuthRedirect] allowing all navigation.
-class DefaultAuthRedirect implements IAuthRedirect {
-  const DefaultAuthRedirect();
-
-  @override
-  String? redirect(String? routeName) => null;
-}
+typedef AuthRedirect = String? Function(String? routeName);
 
 class AppRouter {
   AppRouter._();
 
   /// Pluggable hook to intercept and redirect routes based on authentication/onboarding state.
-  static IAuthRedirect authRedirect = const DefaultAuthRedirect();
+  static AuthRedirect? authRedirect;
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    final destination = authRedirect.redirect(settings.name) ?? settings.name;
+    final destination = authRedirect?.call(settings.name) ?? settings.name;
 
     switch (destination) {
       case RouteNames.splash:
@@ -63,14 +50,18 @@ class AppRouter {
         );
 
       case RouteNames.updateRequired:
-        final updateUrl = settings.arguments as String? ?? '';
+        final updateUrl = settings.arguments is String
+            ? settings.arguments as String
+            : '';
         return MaterialPageRoute(
           builder: (_) => buildUpdateRequiredRoute(updateUrl),
           settings: settings,
         );
 
       case RouteNames.error:
-        final message = settings.arguments as String?;
+        final message = settings.arguments is String
+            ? settings.arguments as String
+            : null;
         return MaterialPageRoute(
           builder: (_) => buildErrorRoute(message: message),
           settings: settings,

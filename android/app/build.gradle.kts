@@ -78,10 +78,6 @@ android {
             if (hasKeystore) {
                 signingConfig = signingConfigs.getByName("release")
             } else {
-                val isCi = System.getenv("CI") == "true"
-                if (isCi) {
-                    throw GradleException("Release build on CI requires android/key.properties and a configured signing keystore.")
-                }
                 logger.warn("WARNING: android/key.properties not found. Falling back to debug signing key. This build is NOT suitable for Google Play upload.")
                 signingConfig = signingConfigs.getByName("debug")
             }

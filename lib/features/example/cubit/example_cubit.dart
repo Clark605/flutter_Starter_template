@@ -1,7 +1,6 @@
 import 'package:flutter_starter/core/cubit/base_cubit.dart';
 import 'package:flutter_starter/core/errors/failure.dart';
 import 'package:flutter_starter/core/errors/result.dart';
-import 'package:flutter_starter/core/utils/action_token.dart';
 import 'package:flutter_starter/features/example/cubit/example_state.dart';
 import 'package:flutter_starter/features/example/data/models/item_model.dart';
 import 'package:flutter_starter/features/example/data/repositories/item_repository.dart';
@@ -14,20 +13,12 @@ class ExampleCubit extends BaseCubit<ExampleState> {
 
   ExampleCubit(this._repository) : super(const ExampleState.initial());
 
-  Future<void> loadItems({ActionToken? token}) async {
+  Future<void> loadItems() async {
     emit(const ExampleState.loading());
 
     final result = await guard<List<ItemModel>>(
-      () async {
-        final repoResult = await _repository.getItems(
-          page: 1,
-          limit: _pageSize,
-        );
-        return repoResult.fold((items) => items, (failure) => throw failure);
-      },
+      () => _repository.getItems(page: 1, limit: _pageSize),
       key: 'load_items_initial',
-      token: token,
-      retries: 2,
     );
 
     result.fold(
@@ -48,17 +39,10 @@ class ExampleCubit extends BaseCubit<ExampleState> {
     );
   }
 
-  Future<void> refresh({ActionToken? token}) async {
+  Future<void> refresh() async {
     final result = await guard<List<ItemModel>>(
-      () async {
-        final repoResult = await _repository.getItems(
-          page: 1,
-          limit: _pageSize,
-        );
-        return repoResult.fold((items) => items, (failure) => throw failure);
-      },
+      () => _repository.getItems(page: 1, limit: _pageSize),
       key: 'refresh_items',
-      token: token,
     );
 
     result.fold(
@@ -82,7 +66,7 @@ class ExampleCubit extends BaseCubit<ExampleState> {
     );
   }
 
-  Future<void> loadMore({ActionToken? token}) async {
+  Future<void> loadMore() async {
     final currentState = state;
     if (currentState is! ExampleStateLoaded ||
         currentState.isLoadingMore ||
@@ -94,15 +78,8 @@ class ExampleCubit extends BaseCubit<ExampleState> {
     final nextPage = currentState.page + 1;
 
     final result = await guard<List<ItemModel>>(
-      () async {
-        final repoResult = await _repository.getItems(
-          page: nextPage,
-          limit: _pageSize,
-        );
-        return repoResult.fold((items) => items, (failure) => throw failure);
-      },
+      () => _repository.getItems(page: nextPage, limit: _pageSize),
       key: 'load_more_items',
-      token: token,
     );
 
     result.fold(
@@ -125,32 +102,27 @@ class ExampleCubit extends BaseCubit<ExampleState> {
   Future<Result<ItemModel>> createItem({
     required String title,
     required String body,
-    ActionToken? token,
   }) async {
-    return guard<ItemModel>(
-      () async {
-        final repoResult = await _repository.createItem(
-          title: title,
-          body: body,
-        );
-        return repoResult.fold((item) => item, (failure) => throw failure);
-      },
+    final result = await guard<ItemModel>(
+      () => _repository.createItem(title: title, body: body),
       key: 'create_item',
-      token: token,
-      onSuccess: (newItem) {
-        state.maybeWhen(
-          loaded: (items, hasMore, isLoadingMore, page) {
-            emit(
-              ExampleState.loaded(
-                items: [newItem, ...items],
-                hasMore: hasMore,
-                page: page,
-              ),
-            );
-          },
-          orElse: () {},
-        );
-      },
     );
+
+    result.fold((newItem) {
+      state.maybeWhen(
+        loaded: (items, hasMore, isLoadingMore, page) {
+          emit(
+            ExampleState.loaded(
+              items: [newItem, ...items],
+              hasMore: hasMore,
+              page: page,
+            ),
+          );
+        },
+        orElse: () {},
+      );
+    }, (_) {});
+
+    return result;
   }
 }

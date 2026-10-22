@@ -49,4 +49,5 @@ ErrorMapper.register(mapSupabaseException);
 1. Provide `SupabaseItemRemoteDataSourceImpl` implementing `ItemRemoteDataSource`.
 2. Register it with `@LazySingleton(as: ItemRemoteDataSource)`.
 3. Register the Supabase error mapper with `ErrorMapper.register(...)`.
-4. Run `dart run build_runner build --delete-conflicting-outputs`.
+4. Data sources and repositories throw; `guard()` in Cubit/Bloc returns `Result<T>`.
+5. Run `dart run build_runner build --delete-conflicting-outputs`.

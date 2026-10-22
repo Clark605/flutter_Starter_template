@@ -109,10 +109,10 @@ Future<void> bootstrap() async {
     if (getIt.isRegistered<IRemoteConfigService>()) {
       final remoteConfig = getIt<IRemoteConfigService>();
       try {
-        await Future.wait([
-          remoteConfig.init(),
-          remoteConfig.fetchAndActivate(),
-        ]).timeout(AppConfig.remoteConfigTimeout);
+        await (() async {
+          await remoteConfig.init();
+          await remoteConfig.fetchAndActivate();
+        })().timeout(AppConfig.remoteConfigTimeout);
       } on Object catch (e, st) {
         AppLogger.warning(
           'RemoteConfig initialization timed out or failed; falling back to default values.',
@@ -152,7 +152,7 @@ Future<void> bootstrap() async {
       await getIt<ICrashReporter>().recordError(e, st, fatal: true);
     }
     initialRoute = RouteNames.error;
-    initialRouteArgs = 'Failed to initialize app: $e';
+    initialRouteArgs = null;
   } finally {
     // 5. Always remove native splash screen to prevent UI deadlock
     FlutterNativeSplash.remove();

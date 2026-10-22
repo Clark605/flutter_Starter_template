@@ -13,12 +13,4 @@ class RouteNames {
   static const String maintenance = '/maintenance';
   static const String updateRequired = '/update-required';
   static const String notFound = '/404';
-
-  /// Routes that require an authenticated user session.
-  static const Set<String> protectedRoutes = {
-    home,
-    settings,
-    example,
-    exampleDetail,
-  };
 }

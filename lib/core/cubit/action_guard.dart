@@ -4,7 +4,6 @@ import 'package:flutter_starter/core/errors/error_mapper.dart';
 import 'package:flutter_starter/core/errors/failure.dart';
 import 'package:flutter_starter/core/errors/result.dart';
 import 'package:flutter_starter/core/observability/crash_reporter.dart';
-import 'package:flutter_starter/core/utils/action_token.dart';
 import 'package:flutter_starter/core/utils/app_logger.dart';
 
 /// Configuration hook for [ActionGuard].
@@ -19,48 +18,30 @@ class ActionGuardConfig {
 
 /// Mixin for [BlocBase] (Cubits and Blocs) that provides resilient, guarded async operations.
 ///
-/// Replaces legacy SafeActionCubit with:
-/// - Explicit [Result<T>] returns (never ambiguous null).
+/// Features:
+/// - Explicit [Result<T>] returns.
 /// - Central exception mapping via [ErrorMapper].
-/// - Closed-state and cooperative cancellation via [ActionToken].
+/// - Closed-state safety checks.
 /// - Double-submit / re-entrancy prevention via action [key] (returning [Failure.duplicate]).
-/// - Exponential backoff retry support for transient errors.
 /// - Release-safe logging and unexpected error forwarding via [ActionGuardConfig.crashReporter].
 mixin ActionGuard<S> on BlocBase<S> {
   final Set<String> _inFlightActionKeys = <String>{};
+
+  bool _isInactive(Emitter<S>? emitter) =>
+      isClosed || (emitter != null && emitter.isDone);
 
   /// Guards an async [action], catching all errors and returning a typed [Result<T>].
   ///
   /// [key]: Optional unique key. If provided and an action with this key is already
   /// running, the call is rejected returning [Failure.duplicate] to prevent double-submit.
   ///
-  /// [token]: Optional [ActionToken] checked before execution, after completion,
-  /// and between retry intervals. When cancelled, returns [Failure.cancelled].
-  ///
-  /// [retries]: Number of retry attempts for transient failures.
-  /// Defaults to 0 (no retries).
-  ///
-  /// [retryDelay]: Initial delay before the first retry. Doubles on each attempt.
-  ///
   /// [emitter]: Optional [Emitter] if called from inside a Bloc event handler.
-  /// Checked for `emitter.isDone`.
   Future<Result<T>> guard<T>(
     Future<T> Function() action, {
     String? key,
-    ActionToken? token,
-    int retries = 0,
-    Duration retryDelay = const Duration(milliseconds: 500),
     Emitter<S>? emitter,
-    String? logTag,
-    void Function(T data)? onSuccess,
-    void Function(Failure failure)? onFailure,
   }) async {
-    final tag = logTag ?? runtimeType.toString();
-
-    // Check cancellation before starting
-    if (token?.isCancelled ?? false) {
-      return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
-    }
+    final tag = runtimeType.toString();
 
     // Prevent duplicate concurrent execution of the same action
     if (key != null) {
@@ -72,58 +53,22 @@ mixin ActionGuard<S> on BlocBase<S> {
     }
 
     try {
-      var attempt = 0;
-      while (true) {
-        if (isClosed || (emitter != null && emitter.isDone)) {
+      if (_isInactive(emitter)) {
+        return const Result.failure(Failure.cancelled(code: 'CLOSED'));
+      }
+
+      try {
+        final data = await action();
+
+        if (_isInactive(emitter)) {
           return const Result.failure(Failure.cancelled(code: 'CLOSED'));
         }
-        if (token?.isCancelled ?? false) {
-          return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
-        }
 
-        try {
-          final data = await action();
-
-          if (isClosed || (emitter != null && emitter.isDone)) {
-            return const Result.failure(Failure.cancelled(code: 'CLOSED'));
-          }
-          if (token?.isCancelled ?? false) {
-            return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
-          }
-
-          onSuccess?.call(data);
-          return Result.success(data);
-        } on Object catch (error, stackTrace) {
-          final failure = ErrorMapper.map(error, stackTrace);
-
-          // Retry logic for transient failures
-          if (attempt < retries && failure.isRetryable) {
-            if (token?.isCancelled ?? false) {
-              return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
-            }
-
-            attempt++;
-            final delay = retryDelay * (1 << (attempt - 1));
-            AppLogger.warning(
-              'Retry attempt $attempt/$retries for $tag after ${delay.inMilliseconds}ms',
-              tag: tag,
-            );
-            await Future<void>.delayed(delay);
-
-            if (token?.isCancelled ?? false) {
-              return const Result.failure(Failure.cancelled(code: 'CANCELLED'));
-            }
-            continue;
-          }
-
-          _logAndReportFailure(failure, tag);
-
-          if (!isClosed && (emitter == null || !emitter.isDone)) {
-            onFailure?.call(failure);
-          }
-
-          return Result.failure(failure);
-        }
+        return Result.success(data);
+      } on Object catch (error, stackTrace) {
+        final failure = ErrorMapper.map(error, stackTrace);
+        _logAndReportFailure(failure, tag);
+        return Result.failure(failure);
       }
     } finally {
       if (key != null) {

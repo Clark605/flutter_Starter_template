@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **State Management**: `flutter_bloc` with demonstrated reference implementations for both `Cubit` (`ExampleCubit`) and `Bloc` (`ExampleDetailBloc`).
 - **Resilient ActionGuard**:
   - Double-submit and re-entrant prevention using action keys and returning `Failure.duplicate`.
-  - Cooperative cancellation using lightweight `ActionToken` with listener callbacks and Dio `CancelToken` bridging.
+  - For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
   - Exponential backoff retry for transient network/server failures.
   - Decoupled from direct service locator access via configurable `ActionGuardConfig.crashReporter`.
 - **Pluggable Error Mapping**:
@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Navigation & Routing**:
   - General purpose `AppRouter` with typed route arguments (`ExampleDetailArgs`).
   - Automatic fallback to `NotFoundScreen` (`buildNotFoundRoute`) for invalid or missing route arguments.
-  - Pluggable `IAuthRedirect` navigation guard with `RouteNames.protectedRoutes` set.
+  - Pluggable `AuthRedirect` navigation guard function.
 - **Theming & Localization**:
   - Material 3 design system with light and dark themes and complete token sets (`AppSpacing`, `AppRadius`, `AppDurations`, `Breakpoints`).
   - Font switching: Inter for English, IBM Plex Sans Arabic for Arabic.

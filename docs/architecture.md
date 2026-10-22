@@ -1,6 +1,6 @@
 # Architectural Blueprint
 
-`flutter_starter` implements a modular, feature-first architecture with a clean repository boundary, eliminating the overhead of an artificial domain layer. Presentation logic depends exclusively on repository interfaces (`i_<feature>_repository.dart`), ensuring high testability, fast compilation, and seamless backend independence.
+`flutter_starter` implements a modular, feature-first architecture with a clean repository boundary, eliminating the overhead of an artificial domain layer. Presentation logic depends exclusively on repository interfaces (`<feature>_repository.dart`), ensuring high testability, fast compilation, and seamless backend independence.
 
 ```mermaid
 flowchart TD
@@ -17,7 +17,7 @@ flowchart TD
     end
 
     subgraph RepositoryLayer ["Data Boundary (Interface in data/)"]
-        RepoInterface["IFeatureRepository\n(Returns Result<T>)"]
+        RepoInterface["FeatureRepository\n(Returns Future<T>)"]
     end
 
     subgraph DataLayer ["Data Layer (Implementation)"]
@@ -42,7 +42,7 @@ flowchart TD
 Traditional "Clean Architecture" in Flutter frequently introduces three boilerplate layers for every feature: `Entity`, `UseCase`, and `Repository`. In 95% of mobile features, `UseCase` merely calls `Repository.method()` without adding logic.
 
 In `flutter_starter`:
-- **Repository Interface is the Domain Contract**: It defines business capability and returns `Result<T>`.
+- **Repository Interface is the Domain Contract**: It defines business capability and returns plain `Future<T>`. Data sources and repositories throw; `guard()` in Cubit/Bloc is the only place errors become `Failure` / `Result<T>`.
 - **DTOs are Immutable Values**: Freezed models (`*.freezed.dart`, `*.g.dart`) provide serialization, deep equality, and `copyWith`.
 - **No Direct Data Source Leaks**: Cubits never see Dio, Firebase, or Supabase.
 
@@ -50,16 +50,16 @@ In `flutter_starter`:
 
 ## 2. Guarded Actions (`ActionGuard`)
 
-`ActionGuard<S>` is a robust mixin on `BlocBase<S>` that encapsulates asynchronous safety, duplicate suppression, cooperative cancellation, and exponential retry.
+`ActionGuard<S>` is a robust mixin on `BlocBase<S>` that encapsulates asynchronous safety, duplicate suppression, and error handling. For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
 
 ### Features & Protections:
 - **Explicit Result Types**: Returns `Result<T>` (`Success` or `Error`).
-- **Cooperative Cancellation (`ActionToken`)**: Accepts an optional `ActionToken` checked before execution, after execution, and between retries. Returns `Failure.cancelled(code: 'CANCELLED')` without false error alarms.
+- **Closed-State Safety**: Checks whether the Cubit is closed or `Emitter.isDone` before and after async operations.
 - **Double-Submit Prevention (`key`)**: Concurrent invocations sharing the same action `key` reject the duplicate call with `Failure.duplicate` (`code: 'DUPLICATE_ACTION'`).
 - **Decoupled Crash Reporting**: Decoupled from the service locator via `ActionGuardConfig.crashReporter` configured during `bootstrap()`.
-- **Exponential Backoff**: Retries transient failures (`failure.isRetryable`) with configurable delay and multiplier.
+- **Single Retry Layer**: Automatic retry for transient HTTP failures is handled at the network level by `RetryInterceptor`.
 
-### Cubit Example with Cancellation Token:
+### Cubit Example:
 ```dart
 @injectable
 class ExampleCubit extends BaseCubit<ExampleState> {
@@ -67,17 +67,12 @@ class ExampleCubit extends BaseCubit<ExampleState> {
 
   ExampleCubit(this._repository) : super(const ExampleState.initial());
 
-  Future<void> loadItems({ActionToken? token}) async {
+  Future<void> loadItems() async {
     emit(const ExampleState.loading());
 
     final result = await guard<List<ItemModel>>(
-      () async {
-        final repoResult = await _repository.getItems(page: 1, limit: 10);
-        return repoResult.fold((items) => items, (failure) => throw failure);
-      },
+      () => _repository.getItems(page: 1, limit: 10),
       key: 'load_items_initial',
-      token: token,
-      retries: 2,
     );
 
     result.fold(
@@ -102,24 +97,19 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
   ExampleDetailBloc(this._repository) : super(const ExampleDetailState.initial()) {
     on<ExampleDetailEvent>((event, emit) async {
       await event.when(
-        load: (id, token) => _onLoad(id, emit, token: token),
-        refresh: (id, token) => _onRefresh(id, emit, token: token),
+        load: (id) => _onLoad(id, emit),
+        refresh: (id) => _onRefresh(id, emit),
       );
     });
   }
 
-  Future<void> _onLoad(int id, Emitter<ExampleDetailState> emit, {ActionToken? token}) async {
+  Future<void> _onLoad(int id, Emitter<ExampleDetailState> emit) async {
     emit(const ExampleDetailState.loading());
 
     final result = await guard<ItemModel>(
-      () async {
-        final res = await _repository.getItem(id);
-        return res.fold((item) => item, (failure) => throw failure);
-      },
+      () => _repository.getItem(id),
       key: 'load_item_detail_$id',
-      token: token,
       emitter: emit, // Checked for emitter.isDone
-      retries: 2,
     );
 
     result.fold(
@@ -134,20 +124,7 @@ class ExampleDetailBloc extends Bloc<ExampleDetailEvent, ExampleDetailState>
 }
 ```
 
-### Bridging `ActionToken` to Dio `CancelToken`
-To abort an ongoing HTTP request when an `ActionToken` is cancelled:
-
-```dart
-import 'package:flutter_starter/core/network/dio_token_adapter.dart';
-import 'package:flutter_starter/core/utils/action_token.dart';
-
-// In data source implementation:
-Future<ItemModel> fetchItem(int id, {ActionToken? actionToken}) async {
-  final dioCancelToken = actionToken?.toDioCancelToken();
-  final response = await _dio.get('/items/$id', cancelToken: dioCancelToken);
-  return ItemModel.fromJson(response.data);
-}
-```
+For cancelling HTTP requests, pass Dio's `CancelToken` to the data source.
 
 ---
 
@@ -219,24 +196,16 @@ AppNavigator.pushNamed(
 If arguments are missing, corrupt, or invalid (e.g. `itemId <= 0`), `buildExampleDetailRoute` redirects safely to `buildNotFoundRoute(RouteNames.exampleDetail)` (404 Screen) rather than failing silently with default zeros.
 
 ### Pluggable Authentication Redirects:
-`RouteNames.protectedRoutes` defines routes requiring authenticated sessions. Navigation guards implement `IAuthRedirect`:
+Navigation guards use the `AuthRedirect` function typedef:
 
 ```dart
-class AuthRedirectGuard implements IAuthRedirect {
-  final TokenProvider _tokenProvider;
-  AuthRedirectGuard(this._tokenProvider);
-
-  @override
-  String? redirect(String? routeName) {
-    if (RouteNames.protectedRoutes.contains(routeName) && !_tokenProvider.hasValidToken) {
-      return RouteNames.onboarding;
-    }
-    return null; // Allow normal navigation
-  }
-}
-
 // Configured in bootstrap or main:
-AppRouter.authRedirect = AuthRedirectGuard(getIt<TokenProvider>());
+AppRouter.authRedirect = (routeName) {
+  if (routeName == RouteNames.home && !getIt<TokenProvider>().hasValidToken) {
+    return RouteNames.onboarding;
+  }
+  return null; // Allow normal navigation
+};
 ```
 
 ---

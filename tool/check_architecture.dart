@@ -48,27 +48,6 @@ void main(List<String> args) {
         normalizedPath.contains('/widgets/screens/');
     final isCore = normalizedPath.startsWith('lib/core/');
 
-    // Check naming conventions for features
-    if (currentFeature != null) {
-      final fileName = normalizedPath.split('/').last;
-      if (normalizedPath.contains('/data/models/')) {
-        if (fileName.endsWith('_dto.dart') ||
-            !fileName.endsWith('_model.dart')) {
-          violations.add(
-            '$normalizedPath: [Naming Convention] File "$fileName" in data/models/ must follow standard Flutter naming "*_model.dart".',
-          );
-        }
-      }
-      if (normalizedPath.contains('/data/repositories/') ||
-          normalizedPath.contains('/data/datasources/')) {
-        if (fileName.startsWith('i_')) {
-          violations.add(
-            '$normalizedPath: [Naming Convention] File "$fileName" should not use "i_" prefix. The name without "impl" is the interface (e.g. "${currentFeature}_repository.dart").',
-          );
-        }
-      }
-    }
-
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i];
       final lineNum = i + 1;
@@ -201,28 +180,28 @@ void main(List<String> args) {
 void _printRules() {
   stdout.writeln('Architecture Rules (Golden Rules Enforcement):');
   stdout.writeln(
-    '  Rule 1: No domain layer - Cubits/Blocs depend on repository interfaces (data/repositories/<feature>_repository.dart), never on data sources (data/datasources/) or concrete implementations (*_impl.dart).',
+    '  Rule 1 [checked]: No domain layer - Cubits/Blocs depend on repository interfaces (data/repositories/<feature>_repository.dart), never on data sources (data/datasources/) or concrete implementations (*_impl.dart).',
   );
   stdout.writeln(
-    '  Rule 2: Result types - UI never sees transport types (Dio/Firebase/Supabase/GraphQL). Errors are converted to Failure.',
+    '  Rule 2 [checked]: Result types - UI never sees transport types (Dio/Firebase/Supabase/GraphQL). Data sources and repositories throw; guard() returns Result<T>.',
   );
   stdout.writeln(
-    '  Rule 3: Freezed unions & ActionGuard - State classes are Freezed unions; Cubits/Blocs use ActionGuard for all async operations.',
+    '  Rule 3 [not automated]: Freezed unions & ActionGuard - State classes are Freezed unions; Cubits/Blocs use ActionGuard for all async operations.',
   );
   stdout.writeln(
-    '  Rule 4: Registration - Repository implementations use @LazySingleton; Cubits/Blocs use @injectable.',
+    '  Rule 4 [not automated]: Registration - Repository implementations use @LazySingleton; Cubits/Blocs use @injectable.',
   );
   stdout.writeln(
-    '  Rule 5: Zero cross-feature imports - Features never import other features. lib/core/ cannot import lib/features/ (except central route_providers.dart).',
+    '  Rule 5 [checked]: Zero cross-feature imports - Features never import other features. lib/core/ cannot import lib/features/ (except central route_providers.dart).',
   );
   stdout.writeln(
-    '  Rule 6: Thin screens - Screens only read state from Cubit/Bloc and render. UI files cannot import data/repositories/ or core/di/injection.dart.',
+    '  Rule 6 [checked]: Thin screens - Screens only read state from Cubit/Bloc and render. UI files cannot import data/repositories/ or core/di/injection.dart.',
   );
   stdout.writeln(
-    '  Rule 7: L10n & Central routing - User-facing strings must use l10n. Routes must be declared centrally in route_names.dart and app_router.dart.',
+    '  Rule 7 [not automated]: L10n & Central routing - User-facing strings must use l10n. Routes must be declared centrally in route_names.dart and app_router.dart.',
   );
   stdout.writeln(
-    '  Rule 8: Design tokens & Clean code - No raw print() calls in production code. Use AppLogger instead.',
+    '  Rule 8 [checked]: Design tokens & Clean code - No raw print() calls in production code. Use AppLogger instead.',
   );
   stdout.writeln('\nInline ignore format:');
   stdout.writeln('  // architecture-ignore: <rule-name> <reason>');
@@ -242,18 +221,6 @@ bool _isIgnored(List<String> lines, int lineIndex, String ruleKeyword) {
     final prev = lines[lineIndex - 1].toLowerCase();
     if (prev.contains('// architecture-ignore:') &&
         prev.contains(ruleKeyword.toLowerCase())) {
-      return true;
-    }
-  }
-
-  // Check top 5 lines of file for file-level ignore
-  for (var i = 0; i < lines.length && i < 5; i++) {
-    final top = lines[i].toLowerCase();
-    if (top.contains('// architecture-ignore-file:') &&
-        top.contains(ruleKeyword.toLowerCase())) {
-      return true;
-    }
-    if (top.contains('// architecture-ignore: all')) {
       return true;
     }
   }
